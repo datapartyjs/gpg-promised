@@ -1,0 +1,22 @@
+{
+  "name": "gpg-promised",
+  "private": false,
+  "version": "0.0.1",
+  "description": "GPG async library",
+  "author": "RosHub Inc. <code@roshub.io>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/datapartyjs/gpg-promised.git"
+  },
+  "main": "src/gpg-promised.js",
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "debug": "^4.1.1",
+    "email-address": "^1.2.2",
+    "gpg": "^0.6.0",
+    "util": "^0.12.1"
+  }
+}
