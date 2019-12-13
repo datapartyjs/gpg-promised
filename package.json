@@ -9,14 +9,17 @@
     "type": "git",
     "url": "https://github.com/datapartyjs/gpg-promised.git"
   },
-  "main": "src/gpg-promised.js",
+  "main": "src/index.js",
   "files": [
     "src"
   ],
   "dependencies": {
+    "@hapi/hoek": "^8.5.0",
     "debug": "^4.1.1",
-    "email-address": "^1.2.2",
-    "gpg": "^0.6.0",
-    "util": "^0.12.1"
+    "email-addresses": "^3.1.0",
+    "mkdirp": "^0.5.1",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.5",
+    "tmp": "^0.1.0"
   }
 }
