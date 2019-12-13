@@ -217,12 +217,12 @@ class KeyChain {
   }
 
 
-  async generateKey({email, name, expire=0, passphrase, keyType='rsa', keySize=4096, unattend=false}){
+  async generateKey({email, name, expire=0, passphrase, keyType='RSA', keySize=4096, unattend=false}){
     const command = ['--generate-key']
 
     //! https://www.gnupg.org/documentation/manuals/gnupg/Unattended-GPG-key-generation.html
-    let statements = 'Key-Type: RSA' + '\n' +
-      'Key-Length: 4096' + '\n' +
+    let statements = 'Key-Type: ' + keyType + '\n' +
+      'Key-Length: ' + keySize + '\n' +
       'Name-Real: ' + name + '\n' +
       'Name-Email: ' + email + '\n' +
       'Expire-Date: ' + expire + '\n'
