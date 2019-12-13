@@ -1,7 +1,7 @@
 const fork = require('child_process').fork
 const exec = require('child_process').exec
-const debug = require('debug')('gpg-promised.shell')
-const verbose = require('debug')('verbose.gpg-promised.shell')
+const debug = require('debug')('shell')
+const verbose = require('debug')('verbose.shell')
 
 exports.fork = async function(path, args, opts={}){
   debug('fork -', args)
@@ -19,7 +19,7 @@ exports.fork = async function(path, args, opts={}){
   return await promise
 }
 
-exports.exec = async function(cmd, opts={}){
+exports.exec = async function(cmd, opts={}, input){
   debug('exec -', cmd)
   let promise = await new Promise((resolve,reject)=>{
 
@@ -39,7 +39,9 @@ exports.exec = async function(cmd, opts={}){
 
       resolve({ stdout, stderr })
     })
-
+    
+    verbose('exec input', input)
+    child.stdin.end(input)
     
   })
   .catch(err=>{throw err})
