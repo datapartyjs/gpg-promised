@@ -49,6 +49,16 @@ class KeyChain {
     }
   }
 
+
+  async call(input, args, nonbatch=false){
+    const gpgArgs = ['--homedir', this.homedir, (nonbatch!=true) ? '--batch' : undefined  ].concat(args)
+
+    debug('call -', gpgArgs)
+    const result = await exec('gpg '+gpgArgs.join(' '), undefined, input)
+
+    return result
+  }
+
   async hasCard(){
     
     try{
@@ -89,6 +99,15 @@ class KeyChain {
     }
 
     return true
+  }
+
+  async cardStatus(){
+    const command = ['--card-status', '--with-colons', '--with-fingerprint']
+    const list = (await this.call('', command)).stdout.toString()
+
+    const status = GPGParser.parseReaderColons(list)
+    debug('card status', status)
+    return status
   }
 
   async trustCard(){
@@ -157,22 +176,74 @@ class KeyChain {
     debug('recv data', status)
   }
 
-  async cardStatus(){
-    const command = ['--card-status', '--with-colons', '--with-fingerprint']
-    const list = (await this.call('', command)).stdout.toString()
+  async sendKeys(server, fpr){
+    const command = ['--send-keys']
 
-    const status = GPGParser.parseReaderColons(list)
-    debug('card status', status)
-    return status
+    if(server){
+      command.push('--keyserver')
+      command.push(server)
+    }
+
+    if(fpr){
+      command.push(fpr)
+    }
+
+    await this.call('', command)
+    return
   }
 
-  async call(input, args, nonbatch=false){
-    const gpgArgs = ['--homedir', this.homedir, (nonbatch!=true) ? '--batch' : undefined  ].concat(args)
+  async refreshKeys(server){
+    const command = ['--refresh-keys']
 
-    debug('call -', gpgArgs)
-    const result = await exec('gpg '+gpgArgs.join(' '), undefined, input)
+    if(server){
+      command.push('--keyserver')
+      command.push(server)
+    }
 
-    return result
+    await this.call('', command)
+    return
+  }
+
+  async signKey(to, from){
+    const command = ['--edit-key', to, 'sign']
+
+    if(from){
+      command.push('--local-user')
+      command.push(from)
+    }
+
+    await this.call('', command)
+    return
+  }
+
+
+  async generateKey({email, name, expire=0, passphrase, keyType='RSA', keySize=4096, unattend=false}){
+    const command = ['--generate-key']
+
+    //! https://www.gnupg.org/documentation/manuals/gnupg/Unattended-GPG-key-generation.html
+    let statements = 'Key-Type: ' + keyType + '\n' +
+      'Key-Length: ' + keySize + '\n' +
+      'Name-Real: ' + name + '\n' +
+      'Name-Email: ' + email + '\n' +
+      'Expire-Date: ' + expire + '\n'
+
+    if (passphrase && passphrase.length > 0 && !unattend) {
+
+      statements += 'Passphrase: ' + passphrase + '\n'
+
+    } else if (unattend && !passphrase) {
+
+      statements += '%no-protection' + '\n'
+
+    } else {
+      throw new Error('unsupported passphrase/unattend setting')
+    }
+
+    statements += '%commit' + '\n' + '%echo done' + '\n'
+
+    const result = (await this.call(statements, command)).stdout.toString()
+
+    debug('genkey', result)
   }
 
   async encrypt(input, to, from, trust='pgp'){
