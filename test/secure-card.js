@@ -1,3 +1,4 @@
+const os = require('os')
 const GpgPromised = require('../src/index')
 const KeyChain = GpgPromised.KeyChain
 
@@ -5,7 +6,7 @@ const KeyChain = GpgPromised.KeyChain
 
 async function main(){
   
-  const keychain = new KeyChain('/home/alanm/.gpg-promised')
+  const keychain = new KeyChain( os.homedir() + '/.gpg-promised')
 
   await keychain.open()
 
