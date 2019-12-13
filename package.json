@@ -20,6 +20,7 @@
     "mkdirp": "^0.5.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.5",
-    "tmp": "^0.1.0"
+    "tmp": "^0.1.0",
+    "fused": "https://github.com/sevenbitbyte/fused.git"
   }
 }
