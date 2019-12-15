@@ -1,3 +1,5 @@
 # gpg-promised
 
-Proof of concept, interface will be updated
+`The GPG interface for nodejs we were promised`
+
+##
