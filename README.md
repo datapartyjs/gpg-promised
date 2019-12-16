@@ -2,10 +2,13 @@
 
 `The GPG interface for nodejs we were promised`
 
- * Documentation - https://datapartyjs.github.io/gpg-promised/
+ * Documentation - [datapartyjs.github.io/gpg-promised/](https://datapartyjs.github.io/gpg-promised/)
 
 
  ```
+  const GpgPromised = require('gpg-promised')
+  const KeyChain = GpgPromised.KeyChain
+
   const keychain = new KeyChain()
 
   //! open keychain for operations
