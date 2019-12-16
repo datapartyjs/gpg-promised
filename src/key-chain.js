@@ -474,6 +474,13 @@ class KeyChain {
 
 
 
+  /**
+   * Find a key based on id of a sub-key
+   * @param {Array(Object)} list List of parsed GPG output packets
+   * @param {string} sub_key_id Sub key id to search for
+   * @param {*} subField Subkey field (typically ssb or sub)
+   * @returns {Object} Parsed key from GPG output packets
+   */
   static getKeyBySubKeyId(list, sub_key_id, subField = 'ssb'){
     debug('getKeyBySubKeyId', sub_key_id)
     let result = null
@@ -500,6 +507,13 @@ class KeyChain {
     return result
   }
 
+  /**
+   * Find a key by a field value
+   * @param {Array(Object)} list List of parsed GPG output packets
+   * @param {string} field Name/path to field
+   * @param {string} value
+   * @returns {Object} Parsed key from GPG output packets
+   */
   static getKeyByField(list, field, value){
     let result = []
     list.map( key => {
@@ -514,6 +528,11 @@ class KeyChain {
     return result
   }
   
+  /**
+   * Check if the specified secure card matches the supplied key
+   * @param {Object} key A parsed key with ssb field
+   * @param {Object} cardInfo Card info from {@link KeyChain.cardStatus}
+   */
   static isKeyFromCard(key, cardInfo){
     debug('isKeyFromCard', key, cardInfo)
     let snMatch = false
@@ -535,6 +554,13 @@ class KeyChain {
   }
 
 
+  /**
+   * Find a subkey id with specific capabilities
+   * @param {Object} key 
+   * @param {string} cap Capabilities (a, c, e, d)
+   * @param {string} subField Field name/path
+   * @returns {Array(string)} List of subkey ids
+   */
   static getSubKeyIdByCapability(key, cap, subField='ssb'){
     debug('getSubKeyIdByCapability', key, cap, subField)
     const ids = []

@@ -27,7 +27,7 @@
 
 <nav >
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="KeyChain.html">KeyChain</a><ul class='methods'><li data-type='method'><a href="KeyChain.html#call">call</a></li><li data-type='method'><a href="KeyChain.html#cardStatus">cardStatus</a></li><li data-type='method'><a href="KeyChain.html#decrypt">decrypt</a></li><li data-type='method'><a href="KeyChain.html#encrypt">encrypt</a></li><li data-type='method'><a href="KeyChain.html#generateKey">generateKey</a></li><li data-type='method'><a href="KeyChain.html#hasCard">hasCard</a></li><li data-type='method'><a href="KeyChain.html#isCardTrusted">isCardTrusted</a></li><li data-type='method'><a href="KeyChain.html#listPublicKeys">listPublicKeys</a></li><li data-type='method'><a href="KeyChain.html#listSecretKeys">listSecretKeys</a></li><li data-type='method'><a href="KeyChain.html#lookupKey">lookupKey</a></li><li data-type='method'><a href="KeyChain.html#open">open</a></li><li data-type='method'><a href="KeyChain.html#recvKey">recvKey</a></li><li data-type='method'><a href="KeyChain.html#refreshKeys">refreshKeys</a></li><li data-type='method'><a href="KeyChain.html#sendKeys">sendKeys</a></li><li data-type='method'><a href="KeyChain.html#signKey">signKey</a></li><li data-type='method'><a href="KeyChain.html#tar">tar</a></li><li data-type='method'><a href="KeyChain.html#trustCard">trustCard</a></li><li data-type='method'><a href="KeyChain.html#trustKey">trustKey</a></li><li data-type='method'><a href="KeyChain.html#verify">verify</a></li><li data-type='method'><a href="KeyChain.html#whoami">whoami</a></li></ul></li><li><a href="KeyServerClient.html">KeyServerClient</a><ul class='methods'><li data-type='method'><a href="KeyServerClient.html#fetch">fetch</a></li><li data-type='method'><a href="KeyServerClient.html#search">search</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="KeyChain.html">KeyChain</a><ul class='methods'><li data-type='method'><a href="KeyChain.html#.getKeyByField">getKeyByField</a></li><li data-type='method'><a href="KeyChain.html#.getKeyBySubKeyId">getKeyBySubKeyId</a></li><li data-type='method'><a href="KeyChain.html#.getSubKeyIdByCapability">getSubKeyIdByCapability</a></li><li data-type='method'><a href="KeyChain.html#.isKeyFromCard">isKeyFromCard</a></li><li data-type='method'><a href="KeyChain.html#call">call</a></li><li data-type='method'><a href="KeyChain.html#cardStatus">cardStatus</a></li><li data-type='method'><a href="KeyChain.html#decrypt">decrypt</a></li><li data-type='method'><a href="KeyChain.html#encrypt">encrypt</a></li><li data-type='method'><a href="KeyChain.html#generateKey">generateKey</a></li><li data-type='method'><a href="KeyChain.html#hasCard">hasCard</a></li><li data-type='method'><a href="KeyChain.html#isCardTrusted">isCardTrusted</a></li><li data-type='method'><a href="KeyChain.html#listPublicKeys">listPublicKeys</a></li><li data-type='method'><a href="KeyChain.html#listSecretKeys">listSecretKeys</a></li><li data-type='method'><a href="KeyChain.html#lookupKey">lookupKey</a></li><li data-type='method'><a href="KeyChain.html#open">open</a></li><li data-type='method'><a href="KeyChain.html#recvKey">recvKey</a></li><li data-type='method'><a href="KeyChain.html#refreshKeys">refreshKeys</a></li><li data-type='method'><a href="KeyChain.html#sendKeys">sendKeys</a></li><li data-type='method'><a href="KeyChain.html#signKey">signKey</a></li><li data-type='method'><a href="KeyChain.html#tar">tar</a></li><li data-type='method'><a href="KeyChain.html#trustCard">trustCard</a></li><li data-type='method'><a href="KeyChain.html#trustKey">trustKey</a></li><li data-type='method'><a href="KeyChain.html#verify">verify</a></li><li data-type='method'><a href="KeyChain.html#whoami">whoami</a></li></ul></li><li><a href="KeyServerClient.html">KeyServerClient</a><ul class='methods'><li data-type='method'><a href="KeyServerClient.html#fetch">fetch</a></li><li data-type='method'><a href="KeyServerClient.html#search">search</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <div id="main">
@@ -518,6 +518,13 @@ class KeyChain {
 
 
 
+  /**
+   * Find a key based on id of a sub-key
+   * @param {Array(Object)} list List of parsed GPG output packets
+   * @param {string} sub_key_id Sub key id to search for
+   * @param {*} subField Subkey field (typically ssb or sub)
+   * @returns {Object} Parsed key from GPG output packets
+   */
   static getKeyBySubKeyId(list, sub_key_id, subField = 'ssb'){
     debug('getKeyBySubKeyId', sub_key_id)
     let result = null
@@ -544,6 +551,13 @@ class KeyChain {
     return result
   }
 
+  /**
+   * Find a key by a field value
+   * @param {Array(Object)} list List of parsed GPG output packets
+   * @param {string} field Name/path to field
+   * @param {string} value
+   * @returns {Object} Parsed key from GPG output packets
+   */
   static getKeyByField(list, field, value){
     let result = []
     list.map( key => {
@@ -558,6 +572,11 @@ class KeyChain {
     return result
   }
   
+  /**
+   * Check if the specified secure card matches the supplied key
+   * @param {Object} key A parsed key with ssb field
+   * @param {Object} cardInfo Card info from {@link KeyChain.cardStatus}
+   */
   static isKeyFromCard(key, cardInfo){
     debug('isKeyFromCard', key, cardInfo)
     let snMatch = false
@@ -579,6 +598,13 @@ class KeyChain {
   }
 
 
+  /**
+   * Find a subkey id with specific capabilities
+   * @param {Object} key 
+   * @param {string} cap Capabilities (a, c, e, d)
+   * @param {string} subField Field name/path
+   * @returns {Array(string)} List of subkey ids
+   */
   static getSubKeyIdByCapability(key, cap, subField='ssb'){
     debug('getSubKeyIdByCapability', key, cap, subField)
     const ids = []
@@ -608,7 +634,7 @@ module.exports = KeyChain</code></pre>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun Dec 15 2019 18:08:35 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun Dec 15 2019 18:51:39 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
