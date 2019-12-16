@@ -17,11 +17,23 @@ max-cache-ttl 7200
 const exec = require('./shell').exec
 
 class KeyChain {
+
+  /**
+   * A GPG keychain
+   * @class
+   * @constructor
+   * @param {string} homedir Path to use as GPG homedir. Defaults to a tmp directory. See {@link https://github.com/raszi/node-tmp/blob/master/README.md|node-tmp} for more info on temp folder creation.
+   */
+
   constructor(homedir){
     this.homedir = homedir
     this.temp = null
   }
 
+  /**
+   * Open or create the GPG keychain
+   * @method
+   */
 
   async open(){
 
@@ -50,6 +62,14 @@ class KeyChain {
   }
 
 
+  /**
+   * Call a GPG command
+   * @method
+   * @param {string} input STDIN input text
+   * @param {Array(string)} args Command line arguments
+   * @param {boolean} nonbatch Do not use the `--batch` flag
+   * @returns {ExecResult}
+   */
   async call(input, args, nonbatch=false){
     const gpgArgs = ['--homedir', this.homedir, (nonbatch!=true) ? '--batch' : undefined  ].concat(args)
 
@@ -59,6 +79,11 @@ class KeyChain {
     return result
   }
 
+  /**
+   * Check if a secure card is inserted
+   * @method
+   * @returns {boolean}
+   */
   async hasCard(){
     
     try{
@@ -71,6 +96,11 @@ class KeyChain {
     return true
   }
 
+  /**
+   * Is the inserted secure card set to owner trust
+   * @method
+   * @returns {boolean}
+   */
   async isCardTrusted(){
     
     if(! (await this.hasCard()) ){
@@ -101,6 +131,11 @@ class KeyChain {
     return true
   }
 
+  /**
+   * Retrieve secure card metadata
+   * @method
+   * @returns {Object}
+   */
   async cardStatus(){
     const command = ['--card-status', '--with-colons', '--with-fingerprint']
     const list = (await this.call('', command)).stdout.toString()
@@ -110,6 +145,10 @@ class KeyChain {
     return status
   }
 
+  /**
+   * Trust the currently inserted secure card
+   * @method
+   */
   async trustCard(){
     
     if(await this.isCardTrusted()){
@@ -140,6 +179,12 @@ class KeyChain {
 
   }
 
+  /**
+   * Import the supplied key with owner trust
+   * @method
+   * @param {string} keyId Fingerprint/grip/email of desired key
+   * @param {string} level Trust level code
+   */
   async trustKey(keyId, level){
     debug('trust', keyId, level)
     const command = ['--import-ownertrust', ]
@@ -156,8 +201,16 @@ class KeyChain {
     debug('trust = ', trust)
   }
 
-  async lookupKey(text){
-    const hkpClient = new KeyServerClient()
+  /**
+   * Lookup keys. This uses the {@link KeyServerClient} rather than GPG to ensure we don't accidently modify the keychain
+   * @method 
+   * @param {string} text Search text {@link HKPIndexSchema}
+   * @param {boolean} exact Exact matches only
+   * @param {string} [server=KeyServerClient.Addresses.ubuntu]
+   * @returns {string} Parsed csv-to-json search results
+   */
+  async lookupKey(text, exact=false, keyserver=KeyServerClient.Addresses.ubuntu){
+    const hkpClient = new KeyServerClient(keyserver)
     
     const result = await hkpClient.search(text)
 
@@ -168,21 +221,27 @@ class KeyChain {
     return result
   }
 
-  async recvKey(fingerprint){
-    const command = ['--keyserver', 'hkps://keyserver.ubuntu.com:443', '--recv-keys', fingerprint]
+  /**
+   * Recieve key specified by fingerprint
+   * @method
+   * @param {string} fingerprint Fingerpint/email/grip of key to recieve
+   * @param {string} [server=hkps://keyserver.ubuntu.com:443]
+   */
+  async recvKey(fingerprint, server='hkps://keyserver.ubuntu.com:443'){
+    const command = ['--keyserver', server, '--recv-keys', fingerprint]
     const list = (await this.call('', command)).stdout.toString()
 
     const status = GPGParser.parseReaderColons(list)
     debug('recv data', status)
   }
 
-  async sendKeys(server, fpr){
-    const command = ['--send-keys']
-
-    if(server){
-      command.push('--keyserver')
-      command.push(server)
-    }
+  /**
+   * Transmit 
+   * @param {string} [server=hkps://keyserver.ubuntu.com:443]
+   * @param {string} fpr 
+   */
+  async sendKeys(fpr, server='hkps://keyserver.ubuntu.com:443'){
+    const command = ['--keyserver', server, '--send-keys']
 
     if(fpr){
       command.push(fpr)
@@ -192,18 +251,22 @@ class KeyChain {
     return
   }
 
-  async refreshKeys(server){
-    const command = ['--refresh-keys']
-
-    if(server){
-      command.push('--keyserver')
-      command.push(server)
-    }
+  /**
+   * Refresh keyring public keys from specified server
+   * @param {string} [server=hkps://keyserver.ubuntu.com:443]
+   */
+  async refreshKeys(server='hkps://keyserver.ubuntu.com:443'){
+    const command = ['--keyserver', server, '--refresh-keys']
 
     await this.call('', command)
     return
   }
 
+  /**
+   * Sign a key
+   * @param {string} to 
+   * @param {string} from 
+   */
   async signKey(to, from){
     const command = ['--edit-key', to, 'sign']
 
@@ -217,6 +280,18 @@ class KeyChain {
   }
 
 
+  /**
+   * Create public/private key pair
+   * @method
+   * @param {Object} options
+   * @param {string} options.email
+   * @param {string} options.name
+   * @param {string} options.expire
+   * @param {string} options.passphrase
+   * @param {string} [options.keyType=RSA]
+   * @param {string} [options.keySize=4096]
+   * @param {string} [options.unattend=false]
+   */
   async generateKey({email, name, expire=0, passphrase, keyType='RSA', keySize=4096, unattend=false}){
     const command = ['--generate-key']
 
@@ -246,6 +321,15 @@ class KeyChain {
     debug('genkey', result)
   }
 
+  /**
+   * Encrypt, sign, and armor input
+   * @method
+   * @param {string} input 
+   * @param {Array(string)} to 
+   * @param {string} from 
+   * @param {string} [trust=pgp]
+   * @returns {string} ciphertext
+   */
   async encrypt(input, to, from, trust='pgp'){
     const command = ['--encrypt', '--sign', '--armor', '--trust-model', trust]
 
@@ -268,6 +352,11 @@ class KeyChain {
     return result
   }
 
+  /**
+   * Decrypt cipher text
+   * @method
+   * @param {string} input 
+   */
   async decrypt(input){
     const command = ['--decrypt']
 
@@ -277,6 +366,11 @@ class KeyChain {
     return result
   }
 
+  /**
+   * @method
+   * @param {string} input 
+   * @param {string} sender 
+   */
   async verify(input, sender){
     throw new Error('not implemented')
     //const command = ['--logger-fd', '1', '--verify']
@@ -288,6 +382,10 @@ class KeyChain {
     return result
   }
 
+  /**
+   * List of `uid.email` for every secret key with owner trust
+   * @returns {Array(string)}
+   */
   async whoami(){
     const primary = await this.listSecretKeys(true)
 
@@ -302,6 +400,11 @@ class KeyChain {
     return handles
   }
 
+  /**
+   * List of secret keys
+   * @param {boolean} ultimate Only list keys with owner trust
+   * @returns {Array(Objects)} Parsed gpg output packets
+   */
   async listSecretKeys(ultimate=true){
     const command = ['--list-secret-keys', '--with-colons', '--with-fingerprint']
     const list = (await this.call('', command)).stdout.toString()
@@ -311,6 +414,11 @@ class KeyChain {
     })
   }
 
+  /**
+   * List of public keys
+   * @param {boolean} ultimate Only list keys with owner trust
+   * @returns {Array(Objects)} Parsed gpg output packets
+   */
   async listPublicKeys(ultimate=false){
     const command = ['--list-public-keys', '--with-colons', '--with-fingerprint']
     const list = (await this.call('', command)).stdout.toString()
@@ -320,6 +428,19 @@ class KeyChain {
     })
   }
 
+  /**
+   * Encrypt/decrypt gpgtar files
+   * @param {Object} options
+   * @property {string} cwd
+   * @property {string} outputPath
+   * @property {string} to
+   * @property {string} sign
+   * @property {string} encrypt
+   * @property {string} decrypt
+   * @property {string} extractPath
+   * @property {string} inputPaths
+   * @Returns {ExecResult}
+   */
   async tar({cwd, outputPath, to, sign, encrypt, decrypt, extractPath, inputPaths}){
     
     const command = ['gpgtar']
