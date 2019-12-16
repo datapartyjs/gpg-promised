@@ -27,7 +27,7 @@
 
 <nav >
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="KeyChain.html">KeyChain</a><ul class='methods'><li data-type='method'><a href="KeyChain.html#call">call</a></li><li data-type='method'><a href="KeyChain.html#cardStatus">cardStatus</a></li><li data-type='method'><a href="KeyChain.html#decrypt">decrypt</a></li><li data-type='method'><a href="KeyChain.html#encrypt">encrypt</a></li><li data-type='method'><a href="KeyChain.html#generateKey">generateKey</a></li><li data-type='method'><a href="KeyChain.html#hasCard">hasCard</a></li><li data-type='method'><a href="KeyChain.html#isCardTrusted">isCardTrusted</a></li><li data-type='method'><a href="KeyChain.html#listPublicKeys">listPublicKeys</a></li><li data-type='method'><a href="KeyChain.html#listSecretKeys">listSecretKeys</a></li><li data-type='method'><a href="KeyChain.html#lookupKey">lookupKey</a></li><li data-type='method'><a href="KeyChain.html#open">open</a></li><li data-type='method'><a href="KeyChain.html#recvKey">recvKey</a></li><li data-type='method'><a href="KeyChain.html#refreshKeys">refreshKeys</a></li><li data-type='method'><a href="KeyChain.html#sendKeys">sendKeys</a></li><li data-type='method'><a href="KeyChain.html#signKey">signKey</a></li><li data-type='method'><a href="KeyChain.html#tar">tar</a></li><li data-type='method'><a href="KeyChain.html#trustCard">trustCard</a></li><li data-type='method'><a href="KeyChain.html#trustKey">trustKey</a></li><li data-type='method'><a href="KeyChain.html#verify">verify</a></li><li data-type='method'><a href="KeyChain.html#whoami">whoami</a></li></ul></li><li><a href="KeyServerClient.html">KeyServerClient</a><ul class='methods'><li data-type='method'><a href="KeyServerClient.html#fetch">fetch</a></li><li data-type='method'><a href="KeyServerClient.html#search">search</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="KeyChain.html">KeyChain</a><ul class='methods'><li data-type='method'><a href="KeyChain.html#.getKeyByField">getKeyByField</a></li><li data-type='method'><a href="KeyChain.html#.getKeyBySubKeyId">getKeyBySubKeyId</a></li><li data-type='method'><a href="KeyChain.html#.getSubKeyIdByCapability">getSubKeyIdByCapability</a></li><li data-type='method'><a href="KeyChain.html#.isKeyFromCard">isKeyFromCard</a></li><li data-type='method'><a href="KeyChain.html#call">call</a></li><li data-type='method'><a href="KeyChain.html#cardStatus">cardStatus</a></li><li data-type='method'><a href="KeyChain.html#decrypt">decrypt</a></li><li data-type='method'><a href="KeyChain.html#encrypt">encrypt</a></li><li data-type='method'><a href="KeyChain.html#generateKey">generateKey</a></li><li data-type='method'><a href="KeyChain.html#hasCard">hasCard</a></li><li data-type='method'><a href="KeyChain.html#isCardTrusted">isCardTrusted</a></li><li data-type='method'><a href="KeyChain.html#listPublicKeys">listPublicKeys</a></li><li data-type='method'><a href="KeyChain.html#listSecretKeys">listSecretKeys</a></li><li data-type='method'><a href="KeyChain.html#lookupKey">lookupKey</a></li><li data-type='method'><a href="KeyChain.html#open">open</a></li><li data-type='method'><a href="KeyChain.html#recvKey">recvKey</a></li><li data-type='method'><a href="KeyChain.html#refreshKeys">refreshKeys</a></li><li data-type='method'><a href="KeyChain.html#sendKeys">sendKeys</a></li><li data-type='method'><a href="KeyChain.html#signKey">signKey</a></li><li data-type='method'><a href="KeyChain.html#tar">tar</a></li><li data-type='method'><a href="KeyChain.html#trustCard">trustCard</a></li><li data-type='method'><a href="KeyChain.html#trustKey">trustKey</a></li><li data-type='method'><a href="KeyChain.html#verify">verify</a></li><li data-type='method'><a href="KeyChain.html#whoami">whoami</a></li></ul></li><li><a href="KeyServerClient.html">KeyServerClient</a><ul class='methods'><li data-type='method'><a href="KeyServerClient.html#fetch">fetch</a></li><li data-type='method'><a href="KeyServerClient.html#search">search</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <div id="main">
@@ -210,6 +210,809 @@
 
     
         <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".getKeyByField"><span class="type-signature">(static) </span>getKeyByField<span class="signature">(list, field, value)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="key-chain.js.html">key-chain.js</a>, <a href="key-chain.js.html#line517">line 517</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Find a key by a field value</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>list</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array(Object)</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>List of parsed GPG output packets</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>field</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Name/path to field</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Parsed key from GPG output packets</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".getKeyBySubKeyId"><span class="type-signature">(static) </span>getKeyBySubKeyId<span class="signature">(list, sub_key_id, subField)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="key-chain.js.html">key-chain.js</a>, <a href="key-chain.js.html#line484">line 484</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Find a key based on id of a sub-key</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>list</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array(Object)</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>List of parsed GPG output packets</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sub_key_id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Sub key id to search for</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>subField</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    <code>ssb</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Subkey field (typically ssb or sub)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Parsed key from GPG output packets</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".getSubKeyIdByCapability"><span class="type-signature">(static) </span>getSubKeyIdByCapability<span class="signature">(key, cap, subField)</span><span class="type-signature"> &rarr; {Array(string)}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="key-chain.js.html">key-chain.js</a>, <a href="key-chain.js.html#line564">line 564</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Find a subkey id with specific capabilities</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cap</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Capabilities (a, c, e, d)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>subField</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    <code>ssb</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Field name/path</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>List of subkey ids</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array(string)</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".isKeyFromCard"><span class="type-signature">(static) </span>isKeyFromCard<span class="signature">(key, cardInfo)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="key-chain.js.html">key-chain.js</a>, <a href="key-chain.js.html#line536">line 536</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Check if the specified secure card matches the supplied key</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>A parsed key with ssb field</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cardInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Card info from <code>KeyChain.cardStatus</code></p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         
             
@@ -3843,7 +4646,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun Dec 15 2019 18:08:35 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun Dec 15 2019 18:54:48 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

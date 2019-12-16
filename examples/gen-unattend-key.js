@@ -2,6 +2,13 @@ const os = require('os')
 const GpgPromised = require('../src/index')
 const KeyChain = GpgPromised.KeyChain
 
+/***
+ * 
+ * This examples demostrates:
+ *  - constructing a re-usable KeyChain()
+ *  - generating key
+ * 
+ */
 
 
 async function main(){
