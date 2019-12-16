@@ -11,7 +11,7 @@ async function main(){
   await keychain.open()
   
   await keychain.generateKey({
-    email: 'dpc+bob@roshub.io',
+    email: 'test@test.xyz',
     name: 'Bob bob',
     unattend: true,
   })
@@ -20,7 +20,6 @@ async function main(){
   console.log('whoami',who)
 
   return
-
 }
 
 

@@ -1,9 +1,5 @@
 
-/**
- * On Http Keyserver Protocol (HKP)
- * https://git.gnupg.org/cgi-bin/gitweb.cgi?p=gnupg.git;a=blob;f=doc/KEYSERVER;h=f63200a6b464282f4acda19ac4ef615e375d517f;hb=HEAD
- * https://tools.ietf.org/html/draft-shaw-openpgp-hkp-00#section-3.1
- */
+
 
 
 const Url = require('url').URL
@@ -12,6 +8,14 @@ const request = require('request-promise')
 
 const GPGParser = require('./gpg-parser')
 
+/**
+ * Schema for parsing search index from csv to json
+ * @typedef {Object} HKPIndexSchema
+ * @property {object} types
+ * @property {object} types.info  info schame
+ * @property {object} types.pub   pub schema
+ * @property {object} types.uid   uid schema
+ */
 const HKPIndexSchema = {
   types: {
     info: {
@@ -48,11 +52,31 @@ const HKPIndexSchema = {
 }
 
 class KeyServerClient {
-  constructor(uri){
-    this.baseUri = new Url( uri || KeyServerClient.Address.ubuntu )
+
+  /**
+   
+  */
+
+  /**
+   * A client for PGP HKP Servers (Http Keyserver Protocol), see {@link https://tools.ietf.org/html/draft-shaw-openpgp-hkp-00|IETF spec} for protocol information.
+   * @class
+   * @constructor
+   * @param {string} url Address of server, defaults to `KeyServerClient.Addresses.ubuntu`
+   */
+  constructor(url){
+    /**
+     * @type {Url}
+     */
+    this.baseUri = new Url( url || KeyServerClient.Addresses.ubuntu )
   }
 
-  async search(text){
+  /**
+   * Search for keys using text
+   * @method
+   * @param {string} text Search text
+   * @returns {string} parsed colon-seperated-values into json
+   */
+  async search(text, exact=false){
     const searchUrl = new Url ('/pks/lookup', this.baseUri)
 
     searchUrl.searchParams.append('op', 'vindex')
@@ -78,11 +102,23 @@ class KeyServerClient {
     
   }
 
+  /**
+   * @todo Not implemented
+   * @method
+   * @param {string} keyid 
+   */
   async fetch(keyid){
-    //
+    /** todo */
+    throw new Error('not implemented')
   }
 
-  static get Address(){
+  /**
+   * @type {Object}
+   * @property {string} ubuntu https://keyserver.ubuntu.com
+   * @property {string} gnupg http://keys.gnupg.net
+   * @property {string} mit http://pgp.mit.edu
+   */
+  static get Addresses(){
     return {
       ubuntu: 'https://keyserver.ubuntu.com',
       gnupg: 'http://keys.gnupg.net',
