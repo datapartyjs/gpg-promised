@@ -14,7 +14,8 @@
     "src"
   ],
   "scripts": {
-    "build-docs": "npx jsdoc -c jsdoc.json"
+    "clean": "rm -rf docs",
+    "build-docs": "npx jsdoc -c jsdoc.json; cd docs; mv gpg-promised/*/* ./; rm -rf gpg-promised; cd -"
   },
   "dependencies": {
     "@hapi/hoek": "^8.5.0",
