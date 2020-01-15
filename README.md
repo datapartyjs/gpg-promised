@@ -5,7 +5,7 @@
  * Documentation - [datapartyjs.github.io/gpg-promised/](https://datapartyjs.github.io/gpg-promised/)
 
 
- ```
+ ```js
   const GpgPromised = require('gpg-promised')
   const KeyChain = GpgPromised.KeyChain
 
