@@ -356,11 +356,12 @@ class KeyChain {
    * Decrypt cipher text
    * @method
    * @param {string} input 
+   * @returns {Buffer}
    */
   async decrypt(input){
     const command = ['--decrypt']
 
-    const result = (await this.call(input, command)).stdout.toString()
+    const result = (await this.call(input, command)).stdout
 
     debug('enc data', result)
     return result
