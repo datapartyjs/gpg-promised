@@ -11,7 +11,7 @@ const verbose = require('debug')('verbose.shell')
  * @property {string} stderr Stderr content
  */
 
-exports.exec = async function(cmd, opts={}, input){
+exports.exec = async function(cmd, opts={encoding: 'buffer', maxBuffer: 1024*1024*512}, input){
   debug('exec -', cmd)
   let promise = await new Promise((resolve,reject)=>{
 
