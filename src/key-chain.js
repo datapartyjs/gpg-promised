@@ -356,6 +356,7 @@ class KeyChain {
    * Decrypt cipher text
    * @method
    * @param {string} input 
+   * @returns {Buffer}
    */
   async decrypt(input){
     const command = ['--decrypt']
