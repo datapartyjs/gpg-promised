@@ -201,3 +201,21 @@ exports.parseReaderColons = (input)=>{
 
   return output
 }
+
+exports.parseStatusFd = (input)=>{
+  const lines = input.split('\n')
+  const statusLines = lines.filter(line=>{
+    return line.startsWith('[GNUPG:]')
+  })
+
+  const status = statusLines.map(statusLine=>{
+    const [prefix, keyword, ...args] = statusLine.split(' ')
+
+    return {
+      keyword,
+      args
+    }
+  })
+
+  return status
+}

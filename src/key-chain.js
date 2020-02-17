@@ -331,7 +331,7 @@ class KeyChain {
    * @returns {string} ciphertext
    */
   async encrypt(input, to, from, trust='pgp'){
-    const command = ['--encrypt', '--sign', '--armor', '--trust-model', trust]
+    const command = ['--encrypt', '--sign', '--armor', '--status-fd 2', '--trust-model', trust]
 
     if(from){
       command.push('--local-user')
@@ -346,10 +346,15 @@ class KeyChain {
     }
 
 
-    const result = (await this.call(input, command)).stdout.toString()
+    const result = await this.call(input, command)
+    
+    const stdout = result.stdout.toString()
+    const stderr = result.stderr.toString()
 
-    debug('enc data', result)
-    return result
+    debug('enc data', stdout)
+    debug('enc status', stderr)
+    debug('enc status obj', GPGParser.parseStatusFd(stderr))
+    return stdout
   }
 
   /**
@@ -359,12 +364,17 @@ class KeyChain {
    * @returns {Buffer}
    */
   async decrypt(input){
-    const command = ['--decrypt']
+    const command = ['--decrypt','--status-fd 2']
 
-    const result = (await this.call(input, command)).stdout
+    const result = await this.call(input, command)
+    
+    const stdout = result.stdout.toString()
+    const stderr = result.stderr.toString()
 
-    debug('enc data', result)
-    return result
+    debug('dec data', stdout)
+    debug('dec status', stderr)
+    debug('dec status obj', GPGParser.parseStatusFd(stderr))
+    return stdout
   }
 
   /**
