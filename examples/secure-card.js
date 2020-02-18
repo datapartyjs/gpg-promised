@@ -33,6 +33,10 @@ async function main(){
   //! Make a connected security card the primary identity
   await keychain.trustCard()
 
+  const who = await keychain.whoami()
+  console.log('whoami',who)
+
+
   //! Download keys for reciepents
   for(const toEmail of toEmails){
     console.log('recvKey -', toEmail)
@@ -40,9 +44,6 @@ async function main(){
     await keychain.recvKey(toKeyLookup.keyid)
   }
   
-  const who = await keychain.whoami()
-  console.log('whoami',who)
-
   const enc = await keychain.encrypt('hello world', who.concat(toEmails), who[0])
   console.log('encrypt -', enc)
 

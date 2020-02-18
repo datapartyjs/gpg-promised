@@ -163,8 +163,8 @@ class KeyChain {
     const cardStatus = await this.cardStatus()
     const subFingerprint = (cardStatus.fpr[0] || '').toLowerCase()
 
-    debug('card status', cardStatus)
-    debug('sub fpr', subFingerprint)
+    debug('trustCard card status', cardStatus)
+    debug('trustCard sub fpr', subFingerprint)
 
     await this.recvKey(subFingerprint)
 
@@ -173,13 +173,14 @@ class KeyChain {
 
     if(!cardKey){ throw new Error('Card key not found') }
 
+    debug('trustCard', cardKey)
     const fingerprint = Hoek.reach(cardKey.fpr, '0.user_id')
 
     if(!fingerprint){ throw new Error('Could not find key by subkey fingerprint', subFingerprint) }
 
-    debug('fpr', fingerprint)
+    debug('trustCard fpr', fingerprint)
 
-    await this.trustKey(fingerprint, '6')
+    await this.trustKey(fingerprint, '5')
 
   }
 
@@ -187,22 +188,19 @@ class KeyChain {
    * Import the supplied key with owner trust
    * @method
    * @param {string} keyId Fingerprint/grip/email of desired key
-   * @param {string} level Trust level code
+   * @param {string} level Trust level code (1 - 5)
    */
   async trustKey(keyId, level){
     debug('trust', keyId, level)
-    const command = ['--import-ownertrust', ]
 
-    const existingTrust = (await this.call('', ['--export-ownertrust'])).stdout.toString()
+    const trustText = (await this.call('', ['--export-ownertrust'])).stdout.toString()
+    const trust = '' + trustText + keyId+':' +(parseInt(level)+1)+ ':\n'
+    const command = ['--import-ownertrust' ]
+    const result = (await this.call(trust, command))
 
-    const trust = '' + existingTrust + keyId+':' +level+ ':\n'
-
-    const list = (await this.call(trust, command)).stdout.toString()
-
-    
-    debug(list)
-
-    debug('trust = ', trust)
+    debug('updating trustdb')
+    debug('trustKey out', result.stdout.toString())
+    debug('trustKey err', result.stderr.toString())
   }
 
   /**
@@ -232,11 +230,13 @@ class KeyChain {
    * @param {string} [server=hkps://keyserver.ubuntu.com:443]
    */
   async recvKey(fingerprint, server='hkps://keyserver.ubuntu.com:443'){
-    const command = ['--keyserver', server, '--recv-keys', fingerprint]
-    const list = (await this.call('', command)).stdout.toString()
+    const command = ['--status-fd 2', '--keyserver', server, '--recv-keys', fingerprint]
+    const response = await this.call('', command)
 
-    const status = GPGParser.parseReaderColons(list)
-    debug('recv data', status)
+    const output = GPGParser.parseReaderColons(response.stdout.toString())
+    const status = GPGParser.parseStatusFd(response.stderr.toString())
+    debug('recvKey output', output)
+    debug('recvKey status', status)
   }
 
   /**
@@ -272,14 +272,17 @@ class KeyChain {
    * @param {string} from 
    */
   async signKey(to, from){
-    const command = ['--edit-key', to, 'sign']
+    const command = ['--command-fd 0', '--status-fd 2', '--edit-key', to]
 
     if(from){
-      command.push('--local-user')
-      command.push(from)
+      command.unshift('--local-user', from)
     }
 
-    await this.call('', command)
+    const result = await this.call('sign\n'+'y\nsave\nquit\n', command, false)
+
+    debug('signKey out', result.stdout.toString())
+    debug('signKey err', result.stderr.toString())
+
     return
   }
 
@@ -357,6 +360,8 @@ class KeyChain {
 
     let imported = GPGParser.StatusHelpers.GetImportedKeys(status)
 
+    debug('imported keys', imported)
+
     return imported
   }
 
@@ -390,7 +395,7 @@ class KeyChain {
     const stdout = result.stdout.toString()
     const stderr = result.stderr.toString()
 
-    debug('enc data', stdout)
+    debug('enc output', stdout)
     debug('enc status', stderr)
     debug('enc status obj', GPGParser.parseStatusFd(stderr))
     return stdout
@@ -410,7 +415,7 @@ class KeyChain {
     const stdout = result.stdout.toString()
     const stderr = result.stderr.toString()
 
-    debug('dec data', stdout)
+    debug('dec output', stdout)
     debug('dec status', stderr)
     debug('dec status obj', JSON.stringify(GPGParser.parseStatusFd(stderr),null,2))
     return stdout
@@ -444,6 +449,7 @@ class KeyChain {
     })
 
     if(handles.length < 1 || !handles[0]){
+      debug('handles.length', handles.length)
       throw new Error('no primary identity')
     }
 

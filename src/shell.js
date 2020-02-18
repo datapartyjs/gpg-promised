@@ -33,7 +33,21 @@ exports.exec = async function(cmd, opts={encoding: 'buffer', maxBuffer: 1024*102
     })
     
     verbose('exec input', input)
-    child.stdin.end(input)
+    let inputs = input.split('\n')
+
+    if(inputs[input.length-1] == null){
+      inputs = inputs.slice(0, inputs.length-1)
+    }
+    if(inputs.length == 0 && input.indexOf('\n') < 0 ){
+      inputs = [input]
+    }
+
+    for(let i of inputs){
+      debug('writing -', i)
+      child.stdin.write(i+'\n')  
+    }
+    
+    child.stdin.end()
     
   })
   .catch(err=>{throw err})
