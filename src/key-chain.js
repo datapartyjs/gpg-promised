@@ -373,7 +373,7 @@ class KeyChain {
 
     debug('dec data', stdout)
     debug('dec status', stderr)
-    debug('dec status obj', GPGParser.parseStatusFd(stderr))
+    debug('dec status obj', JSON.stringify(GPGParser.parseStatusFd(stderr),null,2))
     return stdout
   }
 
