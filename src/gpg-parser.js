@@ -203,11 +203,6 @@ exports.parseReaderColons = (input)=>{
   return output
 }
 
-const SIG_DEF = {
-  'keyid_or_fpr': 'args.0',
-  'username': 'args.1'
-}
-
 const SIG_PARSER = (obj)=>{
   return {
     'keyid_or_fpr': obj.args[0],
