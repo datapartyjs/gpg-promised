@@ -3,6 +3,7 @@ const tmp = require('tmp')
 const path = require('path')
 const mkdirp = require('mkdirp')
 const Hoek = require('@hapi/hoek')
+const {JSONPath} = require('jsonpath-plus')
 
 const GPGParser = require('./gpg-parser')
 const KeyServerClient = require('./key-server-client')
@@ -272,6 +273,7 @@ class KeyChain {
    * @param {string} from 
    */
   async signKey(to, from){
+    debug('signKey -',to, '<', from)
     const command = ['--command-fd 0', '--status-fd 2', '--edit-key', to]
 
     if(from){
@@ -407,17 +409,35 @@ class KeyChain {
    * @param {string} input 
    * @returns {Buffer}
    */
-  async decrypt(input){
-    const command = ['--decrypt','--status-fd 2']
+  async decrypt(input, from=[], trust='pgp'){
+    const command = ['--decrypt','--status-fd 2', '--trust-model '+trust]
 
     const result = await this.call(input, command)
     
     const stdout = result.stdout.toString()
     const stderr = result.stderr.toString()
+    const status = GPGParser.parseStatusFd(stderr)
 
     debug('dec output', stdout)
-    debug('dec status', stderr)
-    debug('dec status obj', JSON.stringify(GPGParser.parseStatusFd(stderr),null,2))
+    debug('dec status', JSON.stringify(status,null,2))
+
+    const validFpr = JSONPath({
+      json: status,
+      path:'$..VALIDSIG.primary_key_fpr'
+    })[0]
+
+    debug(validFpr)
+
+    
+    if(!Array.isArray(from) && from.length > 0){
+      from = [from]
+    }
+    else if(!from || (Array.isArray(from) && from.length < 1)){
+      from = [validFpr]
+    }
+
+    GPGParser.StatusHelpers.AssertSignatureValid(status, from)
+
     return stdout
   }
 
@@ -461,8 +481,8 @@ class KeyChain {
    * @param {boolean} ultimate Only list keys with owner trust
    * @returns {Array(Objects)} Parsed gpg output packets
    */
-  async listSecretKeys(ultimate=true){
-    const command = ['--list-secret-keys', '--with-colons', '--with-fingerprint']
+  async listSecretKeys(ultimate=true, keyId){
+    const command = ['--list-secret-keys', '--with-colons', '--with-fingerprint', keyId]
     const list = (await this.call('', command)).stdout.toString()
 
     return GPGParser.parseColons(list).filter((record)=>{
@@ -475,8 +495,8 @@ class KeyChain {
    * @param {boolean} ultimate Only list keys with owner trust
    * @returns {Array(Objects)} Parsed gpg output packets
    */
-  async listPublicKeys(ultimate=false){
-    const command = ['--list-public-keys', '--with-colons', '--with-fingerprint']
+  async listPublicKeys(ultimate=false, keyId){
+    const command = ['--list-public-keys', '--with-colons', '--with-fingerprint', keyId]
     const list = (await this.call('', command)).stdout.toString()
 
     return GPGParser.parseColons(list).filter((record)=>{

@@ -433,5 +433,39 @@ exports.StatusHelpers = {
         json: status
       }) || []
     )
+  },
+  GetSigPrimaryFpr: (status)=>{
+    const sigFpr = (JSONPath({
+        path: '$..VALIDSIG.primary_key_fpr',
+        json: status
+      }) || [])[0]
+    
+    return sigFpr
+  },
+  AssertSignatureValid: (status, allowed)=>{
+    const isGood = (JSONPath({
+      path: '$..GOODSIG',
+      json: status
+    }) || [])[0]
+
+    if(!isGood){ throw new Error('Signature not good') }
+
+    if(!exports.StatusHelpers.IsSignerAllowed(status,allowed)){ 
+      throw new Error('Signer not allowed')
+    }
+
+  },
+  IsSignerAllowed: (status, allowed)=>{
+    const fpr = exports.StatusHelpers.GetSigPrimaryFpr(status)
+
+    debug('IsSignerAllowed', allowed, fpr)
+
+    if(fpr.length > 0 && Array.isArray(allowed) && allowed.length > 0 && allowed.indexOf(fpr) > -1){
+      debug('\tallowed')
+      return true
+    }
+
+    debug('\tnot allowed')
+    return false
   }
 }
