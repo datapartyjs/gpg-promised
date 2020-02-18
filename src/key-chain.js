@@ -30,6 +30,10 @@ class KeyChain {
     this.temp = null
   }
 
+  static get GPGParser(){
+    return GPGParser
+  }
+
   /**
    * Open or create the GPG keychain
    * @method
@@ -319,6 +323,41 @@ class KeyChain {
     const result = (await this.call(statements, command)).stdout.toString()
 
     debug('genkey', result)
+  }
+
+  async exportPublicKey(keyId){
+    const command = ['--armor', '--status-fd 2', '--export', keyId]
+    const result = await this.call('', command)
+
+    debug('exportKey stdout -', result.stdout.toString())
+    debug('exportKey stderr -', result.stderr.toString())
+
+    return result.stdout.toString()
+  }
+
+  async exportSecretKey(keyId){
+    const command = ['--armor', '--status-fd 2', '--export-secret-keys', keyId]
+    const result = await this.call('', command)
+
+    debug('exportSecretKey stdout -', result.stdout.toString())
+    debug('exportSecretKey stderr -', result.stderr.toString())
+
+    return result.stdout.toString()
+  }
+
+
+  async importKey(key){
+    const command = ['--status-fd 2', '--import']
+    const result = await this.call(key, command)
+
+    debug('importKey stdout -', result.stdout.toString())
+    debug('importKey stderr -', result.stderr.toString())
+
+    const status = GPGParser.parseStatusFd(result.stderr.toString())
+
+    let imported = GPGParser.StatusHelpers.GetImportedKeys(status)
+
+    return imported
   }
 
   /**

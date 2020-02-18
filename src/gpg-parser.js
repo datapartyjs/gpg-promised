@@ -1,7 +1,18 @@
 const Hoek = require('@hapi/hoek')
 const HoekTransform = require('transform-hoek').transform
+const {JSONPath} = require('jsonpath-plus')
 const Address = require('email-addresses')
 const debug = require('debug')('gpg-parser')
+
+const uniqueArray = (arr)=>{
+  return arr.filter((v, i, a) => {
+    if( v !== undefined && a.indexOf(v) === i){
+      return true
+    }
+
+    return false
+  })
+}
 
 const COLONS_FIELD_MAP = {
   1: 'type',
@@ -347,6 +358,38 @@ const STATUS_TRANSFORMS = {
   INV_SGNR: {
     reason: 'args.0',
     sender: 'args.1'
+  },
+  IMPORTED: SIG_PARSER,
+  IMPORT_OK: {
+    reason: 'args.0',
+    fingerprint:'args.1'
+  },
+  IMPORT_PROBLEM: {
+    reason: 'args.0',
+    fingerprint:'args.1'
+  },
+  IMPORT_RES: {
+    count: 'args.0',
+    no_user_id: 'args.1',
+    imported: 'args.2',
+    reserved: 'args.3',
+    unchanged: 'args.4',
+    n_uids: 'args.5',
+    n_subk: 'args.6',
+    n_sigs: 'args.7',
+    n_revoc: 'args.8',
+    sec_read:'args.9',
+    sec_imported:'args.10',
+    sec_dups:'args.11',
+    skipped_new_keys:'args.12',
+    not_imported: 'args.13',
+    skipped_v3_keys:'args.14'
+  },
+  EXPORTED: {fingerprint: 'args.0'},
+  EXPORT_RES: {
+    count: 'args.0',
+    secret_count: 'args.1',
+    exported: 'args.2'
   }
 }
 
@@ -380,4 +423,15 @@ exports.parseStatusFd = (input)=>{
   })
 
   return status
+}
+
+exports.StatusHelpers = {
+  GetImportedKeys: (status)=>{
+    return uniqueArray(
+      JSONPath({
+        path: '$..IMPORT_OK.fingerprint',
+        json: status
+      }) || []
+    )
+  }
 }
