@@ -22,7 +22,7 @@ async function main(){
 
 
   await keychain.generateKey({
-    email: 'test@test.xyz',
+    email: 'bob@test.xyz',
     name: 'Bob bob',
     unattend: true,
   })
@@ -37,6 +37,12 @@ async function main(){
 
   await otherChain.open()
 
+  await otherChain.generateKey({
+    email: 'alice@test.xyz',
+    name: 'Alice alice',
+    unattend: true,
+  })
+
   const imported = await otherChain.importKey(key)
   console.log('imported', imported)
 
@@ -48,7 +54,6 @@ async function main(){
   const other = await otherChain.whoami()
   console.log('other whoami',other)
 
-  process.exit()
 
 
   let toEmails = []
