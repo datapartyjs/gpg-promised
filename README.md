@@ -2,8 +2,11 @@
 
 `The GPG interface for nodejs we were promised`
 
+ * Examples - [examples/](https://github.com/datapartyjs/gpg-promised/tree/master/examples)
  * Documentation - [datapartyjs.github.io/gpg-promised/](https://datapartyjs.github.io/gpg-promised/)
-
+ * NPM - [npmjs.com/package/gpg-promised](https://www.npmjs.com/package/gpg-promised)
+ * Code - [github.com/datapartyjs/gpg-promised](https://github.com/datapartyjs/gpg-promised)
+ * Social - [@datapartyjs](https://twitter.com/datapartyjs)
 
  ```js
   const GpgPromised = require('gpg-promised')
