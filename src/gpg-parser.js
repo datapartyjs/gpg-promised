@@ -344,6 +344,23 @@ class GpgParser {
     }
   }
 
+  /**
+   * Decrypt cipher text
+   * @method
+   * @param {GPGStatusArray} status
+   * @param {Object} options
+   * @param {Object} options.level Acceptable signer trust levels. Trust level of a specific signature is computed with respect to configured trust model
+   * @param {boolean} options.level.none      Accept signers with no trust
+   * @param {boolean} options.level.unknown   Accept signers with unknown/undefined trust
+   * @param {boolean} options.level.never     Accept untrustowrthy signers, potentially with revoked or bad keys
+   * @param {boolean} options.level.marginal  Accept signers with marginal trust
+   * @param {boolean} options.level.full      Accept signers with full trust
+   * @param {boolean} options.level.ultimate  Accept signers with ultimate trust
+   * @param {Object} options.allow Acceptable signature/signer expiry/revoke status
+   * @param {boolean} options.allow.allow_expired_sig Accept expired signatures
+   * @param {boolean} options.allow.allow_expired_key Accept expired signer key
+   * @param {boolean} options.allow.allow_revoked_key Accept revoked signer key
+   */
   static Status_AssertSignatureTrusted(status, {
       none=false,
       unknown=false,
@@ -406,6 +423,8 @@ class GpgParser {
     const trustReason = GpgParser.Status_GetSigTrustResult(status)
 
     if(trustReason === undefined && none === true){
+      debug('WARNING - TRUST_NONE allowed in signature verification')
+      console.log('WARNING - TRUST_NONE allowed in signature verification')
       trustyness = true
     }
     
