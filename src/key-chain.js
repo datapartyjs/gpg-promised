@@ -409,7 +409,9 @@ class KeyChain {
    * @param {string} input 
    * @returns {Buffer}
    */
-  async decrypt(input, from=[], trust='pgp'){
+  async decrypt(input, {
+    from=[], trust='pgp', level, allow
+  }={}){
     const command = ['--decrypt','--status-fd 2', '--trust-model '+trust]
 
     const result = await this.call(input, command)
@@ -436,7 +438,8 @@ class KeyChain {
       from = [validFpr]
     }
 
-    GPGParser.StatusHelpers.AssertSignatureValid(status, from)
+    GPGParser.StatusHelpers.AssertSignatureAllowed(status, from)
+    GPGParser.StatusHelpers.AssertSignatureTrusted(status, level, allow)
 
     return stdout
   }

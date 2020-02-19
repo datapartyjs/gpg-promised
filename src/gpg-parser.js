@@ -425,7 +425,16 @@ exports.parseStatusFd = (input)=>{
   return status
 }
 
-exports.StatusHelpers = {
+const StatusHelpers = {
+  HasKeyword: (status, keyword)=>{
+    const exists = (JSONPath({
+      path: `$..${keyword}`,
+      json: status
+    }) || [])[0]
+
+    if(exists){ return true }
+    return false
+  },
   GetImportedKeys: (status)=>{
     return uniqueArray(
       JSONPath({
@@ -438,25 +447,145 @@ exports.StatusHelpers = {
     const sigFpr = (JSONPath({
         path: '$..VALIDSIG.primary_key_fpr',
         json: status
-      }) || [])[0]
+      }) || [])
     
-    return sigFpr
+    return sigFpr[0]
   },
-  AssertSignatureValid: (status, allowed)=>{
-    const isGood = (JSONPath({
-      path: '$..GOODSIG',
-      json: status
-    }) || [])[0]
-
-    if(!isGood){ throw new Error('Signature not good') }
-
-    if(!exports.StatusHelpers.IsSignerAllowed(status,allowed)){ 
+  AssertSignatureAllowed: (status, allowed=[])=>{
+    if(!StatusHelpers.IsSignerAllowed(status,allowed)){ 
       throw new Error('Signer not allowed')
     }
+  },
+  AssertSignatureTrusted: (status, {
+    none=false,
+    unknown=false,
+    never= false,
+    marginal=true,
+    full=true,
+    ultimate=true
+  }={}, {
+    allow_expired_sig=false,
+    allow_expired_key=false,
+    allow_revoked_key=false
+  }={})=>{
 
+    // Check signature/signer status messages
+    let goodness = StatusHelpers.IsSigGood(status)
+
+    if(allow_expired_sig==true){
+      goodness |= StatusHelpers.IsSigExpired(status)
+    }
+
+    if(allow_expired_key==true){
+      goodness |= StatusHelpers.IsSigKeyExpired(status)
+    }
+
+    if(allow_revoked_key==true){
+      goodness |= StatusHelpers.IsSigKeyRevoked(status)
+    }
+
+
+    // Check signer trustyness
+    let trustyness = false
+    
+    if(unknown==true){
+      trustyness |= StatusHelpers.IsSigTrustUnknown(status)
+    }
+
+    if(marginal==true){
+      trustyness |= StatusHelpers.IsSigTrustMarginal(status)
+    }
+
+    if(full==true){
+      trustyness |= StatusHelpers.IsSigTrustFully(status)
+    }
+
+    if(ultimate==true){
+      trustyness |= StatusHelpers.IsSigTrustUltimate(status)
+    }
+
+    if(never==true){
+      debug('WARNING - TRUST_NEVER allowed in signature verification')
+      console.log('WARNING - TRUST_NEVER allowed in signature verification')
+      trustyness |= StatusHelpers.IsSigTrustNever(status)
+    }
+    else{
+      trustyness &= !StatusHelpers.IsSigTrustNever(status)
+    }
+
+    const goodReason = StatusHelpers.GetSigResult(status)
+    const trustReason = StatusHelpers.GetSigTrustResult(status)
+
+    if(trustReason === undefined && none === true){
+      trustyness = true
+    }
+    
+
+    debug('AssertSignatureTrusted - validating signature [',goodReason, trustReason,']')
+
+    if(!goodness){
+      throw new Error('Signature rejected - '+goodReason)
+    }
+    
+    if(!trustyness){      
+      throw new Error('Signature not trusted - '+trustReason)
+    }
+
+    debug('AssertSignatureTrusted - signature appears good and trusted [',goodReason, trustReason,']')
+    
+  },
+  GetSigResult: (status)=>{
+    if(StatusHelpers.IsSigGood(status)){ return 'GOODSIG' }
+    if(StatusHelpers.IsSigBad(status)){ return 'BADSIG' }
+    if(StatusHelpers.IsSigError(status)){ return 'ERRSIG' }
+    if(StatusHelpers.IsSigExpired(status)){ return 'EXPSIG' }
+    if(StatusHelpers.IsSigKeyExpired(status)){ return 'EXPKEYSIG' }
+    if(StatusHelpers.IsSigKeyRevoked(status)){ return 'REVKEYSIG' }
+    return undefined
+  },
+  GetSigTrustResult: (status)=>{
+    if(StatusHelpers.IsSigTrustUnknown(status)){ return 'TRUST_UNDEFINED' }
+    if(StatusHelpers.IsSigTrustNever(status)){ return 'TRUST_NEVER' }
+    if(StatusHelpers.IsSigTrustMarginal(status)){ return 'TRUST_MARGINAL' }
+    if(StatusHelpers.IsSigTrustFully(status)){ return 'TRUST_FULLY' }
+    if(StatusHelpers.IsSigTrustUltimate(status)){ return 'TRUST_ULTIMATE' }
+    return undefined
+  },
+  IsSigGood: (status)=>{
+    return StatusHelpers.HasKeyword(status, 'GOODSIG')
+  },
+  IsSigBad: (status)=>{
+    return StatusHelpers.HasKeyword(status, 'BADSIG')
+  }, 
+  IsSigError: (status)=>{
+    return StatusHelpers.HasKeyword(status, 'ERRSIG') 
+  },
+  IsSigExpired: (status)=>{
+    return StatusHelpers.HasKeyword(status, 'EXPSIG')
+  },
+  IsSigKeyExpired: (status)=>{
+    return StatusHelpers.HasKeyword(status, 'EXPKEYSIG')
+  },
+  IsSigKeyRevoked: (status)=>{
+    return StatusHelpers.HasKeyword(status, 'REVKEYSIG')
+  },
+  IsSigTrustUnknown: (status)=>{
+    return StatusHelpers.HasKeyword(status, 'TRUST_UNDEFINED')
+  },
+  IsSigTrustNever: (status)=>{
+    return StatusHelpers.HasKeyword(status, 'TRUST_NEVER')
+  },
+  IsSigTrustMarginal: (status)=>{
+    return StatusHelpers.HasKeyword(status, 'TRUST_MARGINAL')
+  },
+  IsSigTrustFully: (status)=>{
+    return StatusHelpers.HasKeyword(status, 'TRUST_FULLY')
+  },
+  IsSigTrustUltimate: (status)=>{
+    return StatusHelpers.HasKeyword(status, 'TRUST_ULTIMATE')
   },
   IsSignerAllowed: (status, allowed)=>{
-    const fpr = exports.StatusHelpers.GetSigPrimaryFpr(status)
+    const fpr = StatusHelpers.GetSigPrimaryFpr(status)
 
     debug('IsSignerAllowed', allowed, fpr)
 
@@ -469,3 +598,5 @@ exports.StatusHelpers = {
     return false
   }
 }
+
+exports.StatusHelpers = StatusHelpers
