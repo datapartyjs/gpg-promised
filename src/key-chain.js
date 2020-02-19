@@ -393,9 +393,9 @@ class KeyChain {
    * Encrypt, sign, and armor input
    * @method
    * @param {string} input 
-   * @param {Array(string)} to 
-   * @param {string} from 
-   * @param {string} [trust=pgp]
+   * @param {Array(string)} to List of keyid, fpr or uid of message recipients
+   * @param {string} from Local keyid or uid to use in message signing
+   * @param {('pgp'|'classic'|'tofu'|'tofu+pgp'|'direct'|'always'|'auto')} [options.trust=pgp] Trust model See [`gpg --trust-model`](https://www.gnupg.org/documentation/manuals/gnupg/GPG-Configuration-Options.html#index-trust_002dmodel)
    * @returns {string} ciphertext
    */
   async encrypt(input, to, from, trust='pgp'){
@@ -429,6 +429,20 @@ class KeyChain {
    * Decrypt cipher text
    * @method
    * @param {string} input 
+   * @param {Object} options
+   * @param {string[]} options.from List of keyid, fpr or uid of allowed message signers. Defaults to allowing any trusted signer
+   * @param {('pgp'|'classic'|'tofu'|'tofu+pgp'|'direct'|'always'|'auto')} [options.trust=pgp] Trust model See [`gpg --trust-model`](https://www.gnupg.org/documentation/manuals/gnupg/GPG-Configuration-Options.html#index-trust_002dmodel)
+   * @param {Object} options.level Acceptable signer trust levels. Trust level of a specific signature is computed with respect to configured trust model
+   * @param {boolean} [options.level.none=false]      Accept signers with no trust
+   * @param {boolean} [options.level.unknown=false]   Accept signers with unknown/undefined trust
+   * @param {boolean} [options.level.never=false]     Accept untrustowrthy signers, potentially with revoked or bad keys
+   * @param {boolean} [options.level.marginal=true]  Accept signers with marginal trust
+   * @param {boolean} [options.level.full=true]      Accept signers with full trust
+   * @param {boolean} [options.level.ultimate=true]  Accept signers with ultimate trust
+   * @param {Object} options.allow Acceptable signature/signer expiry/revoke status
+   * @param {boolean} [options.allow.allow_expired_sig=false] Accept expired signatures
+   * @param {boolean} [options.allow.allow_expired_key=false] Accept expired signer key
+   * @param {boolean} [options.allow.allow_revoked_key=false] Accept revoked signer key
    * @returns {Buffer}
    */
   async decrypt(input, {
