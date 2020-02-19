@@ -1,4 +1,48 @@
-const Hoek = require('@hapi/hoek')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>gpg-parser.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="GpgParser.html">GpgParser</a><ul class='methods'><li data-type='method'><a href="GpgParser.html#.parseColons">parseColons</a></li><li data-type='method'><a href="GpgParser.html#.parseReaderColons">parseReaderColons</a></li><li data-type='method'><a href="GpgParser.html#.parseStatusFd">parseStatusFd</a></li><li data-type='method'><a href="GpgParser.html#.Status_AssertSignatureAllowed">Status_AssertSignatureAllowed</a></li><li data-type='method'><a href="GpgParser.html#Status_GetImportedKeys">Status_GetImportedKeys</a></li><li data-type='method'><a href="GpgParser.html#Status_GetSigPrimaryFpr">Status_GetSigPrimaryFpr</a></li><li data-type='method'><a href="GpgParser.html#Status_GetSigResult">Status_GetSigResult</a></li><li data-type='method'><a href="GpgParser.html#Status_GetSigTrustResult">Status_GetSigTrustResult</a></li><li data-type='method'><a href="GpgParser.html#Status_HasKeyword">Status_HasKeyword</a></li><li data-type='method'><a href="GpgParser.html#Status_IsSigBad">Status_IsSigBad</a></li><li data-type='method'><a href="GpgParser.html#Status_IsSigError">Status_IsSigError</a></li><li data-type='method'><a href="GpgParser.html#Status_IsSigExpired">Status_IsSigExpired</a></li><li data-type='method'><a href="GpgParser.html#Status_IsSigGood">Status_IsSigGood</a></li><li data-type='method'><a href="GpgParser.html#Status_IsSigKeyExpired">Status_IsSigKeyExpired</a></li><li data-type='method'><a href="GpgParser.html#Status_IsSigKeyRevoked">Status_IsSigKeyRevoked</a></li><li data-type='method'><a href="GpgParser.html#Status_IsSignerAllowed">Status_IsSignerAllowed</a></li><li data-type='method'><a href="GpgParser.html#Status_IsSigTrustFully">Status_IsSigTrustFully</a></li><li data-type='method'><a href="GpgParser.html#Status_IsSigTrustMarginal">Status_IsSigTrustMarginal</a></li><li data-type='method'><a href="GpgParser.html#Status_IsSigTrustNever">Status_IsSigTrustNever</a></li><li data-type='method'><a href="GpgParser.html#Status_IsSigTrustUltimate">Status_IsSigTrustUltimate</a></li><li data-type='method'><a href="GpgParser.html#Status_IsSigTrustUnknown">Status_IsSigTrustUnknown</a></li></ul></li><li><a href="KeyChain.html">KeyChain</a><ul class='methods'><li data-type='method'><a href="KeyChain.html#.getKeyByField">getKeyByField</a></li><li data-type='method'><a href="KeyChain.html#.getKeyBySubKeyId">getKeyBySubKeyId</a></li><li data-type='method'><a href="KeyChain.html#.getSubKeyIdByCapability">getSubKeyIdByCapability</a></li><li data-type='method'><a href="KeyChain.html#.isKeyFromCard">isKeyFromCard</a></li><li data-type='method'><a href="KeyChain.html#call">call</a></li><li data-type='method'><a href="KeyChain.html#cardStatus">cardStatus</a></li><li data-type='method'><a href="KeyChain.html#decrypt">decrypt</a></li><li data-type='method'><a href="KeyChain.html#encrypt">encrypt</a></li><li data-type='method'><a href="KeyChain.html#generateKey">generateKey</a></li><li data-type='method'><a href="KeyChain.html#hasCard">hasCard</a></li><li data-type='method'><a href="KeyChain.html#isCardTrusted">isCardTrusted</a></li><li data-type='method'><a href="KeyChain.html#listPublicKeys">listPublicKeys</a></li><li data-type='method'><a href="KeyChain.html#listSecretKeys">listSecretKeys</a></li><li data-type='method'><a href="KeyChain.html#lookupKey">lookupKey</a></li><li data-type='method'><a href="KeyChain.html#open">open</a></li><li data-type='method'><a href="KeyChain.html#recvKey">recvKey</a></li><li data-type='method'><a href="KeyChain.html#refreshKeys">refreshKeys</a></li><li data-type='method'><a href="KeyChain.html#sendKeys">sendKeys</a></li><li data-type='method'><a href="KeyChain.html#signKey">signKey</a></li><li data-type='method'><a href="KeyChain.html#tar">tar</a></li><li data-type='method'><a href="KeyChain.html#trustCard">trustCard</a></li><li data-type='method'><a href="KeyChain.html#trustKey">trustKey</a></li><li data-type='method'><a href="KeyChain.html#verify">verify</a></li><li data-type='method'><a href="KeyChain.html#whoami">whoami</a></li></ul></li><li><a href="KeyServerClient.html">KeyServerClient</a><ul class='methods'><li data-type='method'><a href="KeyServerClient.html#fetch">fetch</a></li><li data-type='method'><a href="KeyServerClient.html#search">search</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">gpg-parser.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const Hoek = require('@hapi/hoek')
 const HoekTransform = require('transform-hoek').transform
 const {JSONPath} = require('jsonpath-plus')
 const Address = require('email-addresses')
@@ -9,7 +53,7 @@ const STATUS_TRANSFORMS = require('./gpg-status-parsers')
 
 const uniqueArray = (arr)=>{
   return arr.filter((v, i, a) => {
-    if( v !== undefined && a.indexOf(v) === i){
+    if( v !== undefined &amp;&amp; a.indexOf(v) === i){
       return true
     }
 
@@ -49,7 +93,7 @@ class GpgParser {
     const output = []
     let depth = []
 
-    for(let idx = 0; idx<records.length; idx++){
+    for(let idx = 0; idx&lt;records.length; idx++){
 
       const record = records[idx]
 
@@ -130,7 +174,7 @@ class GpgParser {
         const fieldMap = Hoek.reach(schema, 'types.'+type+'.fields.'+(idx+1) )
         const col = fieldMap
 
-        if(col && val.length > 0){
+        if(col &amp;&amp; val.length > 0){
           obj[col] = val
         }
       })
@@ -244,7 +288,7 @@ class GpgParser {
 
   /** 
    * GPG Status stream parsed 
-   * @typedef {Array.<GPGStatus>} GPGStatusArray
+   * @typedef {Array.&lt;GPGStatus>} GPGStatusArray
    */
 
 
@@ -399,13 +443,13 @@ class GpgParser {
       trustyness |= GpgParser.Status_IsSigTrustNever(status)
     }
     else{
-      trustyness &= !GpgParser.Status_IsSigTrustNever(status)
+      trustyness &amp;= !GpgParser.Status_IsSigTrustNever(status)
     }
 
     const goodReason = GpgParser.Status_GetSigResult(status)
     const trustReason = GpgParser.Status_GetSigTrustResult(status)
 
-    if(trustReason === undefined && none === true){
+    if(trustReason === undefined &amp;&amp; none === true){
       trustyness = true
     }
     
@@ -563,7 +607,7 @@ class GpgParser {
 
     debug('IsSignerAllowed', allowed, fpr)
 
-    if(fpr.length > 0 && Array.isArray(allowed) && allowed.length > 0 && allowed.indexOf(fpr) > -1){
+    if(fpr.length > 0 &amp;&amp; Array.isArray(allowed) &amp;&amp; allowed.length > 0 &amp;&amp; allowed.indexOf(fpr) > -1){
       debug('\tallowed')
       return true
     }
@@ -573,4 +617,28 @@ class GpgParser {
   }
 }
 
-module.exports = GpgParser
+module.exports = GpgParser</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Tue Feb 18 2020 23:08:58 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

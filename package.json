@@ -1,7 +1,7 @@
 {
   "name": "gpg-promised",
   "private": false,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "GPG async library",
   "author": "RosHub Inc. <code@roshub.io>",
   "license": "Apache-2.0",
@@ -21,10 +21,12 @@
     "@hapi/hoek": "^8.5.0",
     "debug": "^4.1.1",
     "email-addresses": "^3.1.0",
+    "jsonpath-plus": "^3.0.0",
     "mkdirp": "^0.5.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.5",
-    "tmp": "^0.1.0"
+    "tmp": "^0.1.0",
+    "transform-hoek": "^0.0.1"
   },
   "devDependencies": {
     "better-docs": "^1.1.6",

@@ -3,8 +3,9 @@ const tmp = require('tmp')
 const path = require('path')
 const mkdirp = require('mkdirp')
 const Hoek = require('@hapi/hoek')
+const {JSONPath} = require('jsonpath-plus')
 
-const GPGParser = require('./gpg-parser')
+const GpgParser = require('./gpg-parser')
 const KeyServerClient = require('./key-server-client')
 
 const debug = require('debug')('gpg-promised.KeyChain')
@@ -28,6 +29,10 @@ class KeyChain {
   constructor(homedir){
     this.homedir = homedir
     this.temp = null
+  }
+
+  static get GpgParser(){
+    return GpgParser
   }
 
   /**
@@ -90,6 +95,7 @@ class KeyChain {
       const cardStatus = await this.cardStatus()
     }
     catch(err){
+      debug('hasCard - false - err -', err)
       return false
     }
 
@@ -137,10 +143,16 @@ class KeyChain {
    * @returns {Object}
    */
   async cardStatus(){
+    debug('cardStatus')
     const command = ['--card-status', '--with-colons', '--with-fingerprint']
-    const list = (await this.call('', command)).stdout.toString()
 
-    const status = GPGParser.parseReaderColons(list)
+    const response = await this.call('', command)
+    const list = response.stdout.toString()
+
+    debug(response.stderr.toString())
+
+    debug('\t'+list)
+    const status = GpgParser.parseReaderColons(list)
     debug('card status', status)
     return status
   }
@@ -159,8 +171,8 @@ class KeyChain {
     const cardStatus = await this.cardStatus()
     const subFingerprint = (cardStatus.fpr[0] || '').toLowerCase()
 
-    debug('card status', cardStatus)
-    debug('sub fpr', subFingerprint)
+    debug('trustCard card status', cardStatus)
+    debug('trustCard sub fpr', subFingerprint)
 
     await this.recvKey(subFingerprint)
 
@@ -169,13 +181,14 @@ class KeyChain {
 
     if(!cardKey){ throw new Error('Card key not found') }
 
+    debug('trustCard', cardKey)
     const fingerprint = Hoek.reach(cardKey.fpr, '0.user_id')
 
     if(!fingerprint){ throw new Error('Could not find key by subkey fingerprint', subFingerprint) }
 
-    debug('fpr', fingerprint)
+    debug('trustCard fpr', fingerprint)
 
-    await this.trustKey(fingerprint, '6')
+    await this.trustKey(fingerprint, '5')
 
   }
 
@@ -183,22 +196,19 @@ class KeyChain {
    * Import the supplied key with owner trust
    * @method
    * @param {string} keyId Fingerprint/grip/email of desired key
-   * @param {string} level Trust level code
+   * @param {string} level Trust level code (1 - 5)
    */
   async trustKey(keyId, level){
     debug('trust', keyId, level)
-    const command = ['--import-ownertrust', ]
 
-    const existingTrust = (await this.call('', ['--export-ownertrust'])).stdout.toString()
+    const trustText = (await this.call('', ['--export-ownertrust'])).stdout.toString()
+    const trust = '' + trustText + keyId+':' +(parseInt(level)+1)+ ':\n'
+    const command = ['--import-ownertrust' ]
+    const result = (await this.call(trust, command))
 
-    const trust = '' + existingTrust + keyId+':' +level+ ':\n'
-
-    const list = (await this.call(trust, command)).stdout.toString()
-
-    
-    debug(list)
-
-    debug('trust = ', trust)
+    debug('updating trustdb')
+    debug('trustKey out', result.stdout.toString())
+    debug('trustKey err', result.stderr.toString())
   }
 
   /**
@@ -228,11 +238,13 @@ class KeyChain {
    * @param {string} [server=hkps://keyserver.ubuntu.com:443]
    */
   async recvKey(fingerprint, server='hkps://keyserver.ubuntu.com:443'){
-    const command = ['--keyserver', server, '--recv-keys', fingerprint]
-    const list = (await this.call('', command)).stdout.toString()
+    const command = ['--status-fd 2', '--keyserver', server, '--recv-keys', fingerprint]
+    const response = await this.call('', command)
 
-    const status = GPGParser.parseReaderColons(list)
-    debug('recv data', status)
+    const output = GpgParser.parseReaderColons(response.stdout.toString())
+    const status = GpgParser.parseStatusFd(response.stderr.toString())
+    debug('recvKey output', output)
+    debug('recvKey status', status)
   }
 
   /**
@@ -268,14 +280,18 @@ class KeyChain {
    * @param {string} from 
    */
   async signKey(to, from){
-    const command = ['--edit-key', to, 'sign']
+    debug('signKey -',to, '<', from)
+    const command = ['--command-fd 0', '--status-fd 2', '--edit-key', to]
 
     if(from){
-      command.push('--local-user')
-      command.push(from)
+      command.unshift('--local-user', from)
     }
 
-    await this.call('', command)
+    const result = await this.call('sign\n'+'y\nsave\nquit\n', command, false)
+
+    debug('signKey out', result.stdout.toString())
+    debug('signKey err', result.stderr.toString())
+
     return
   }
 
@@ -321,6 +337,43 @@ class KeyChain {
     debug('genkey', result)
   }
 
+  async exportPublicKey(keyId){
+    const command = ['--armor', '--status-fd 2', '--export', keyId]
+    const result = await this.call('', command)
+
+    debug('exportKey stdout -', result.stdout.toString())
+    debug('exportKey stderr -', result.stderr.toString())
+
+    return result.stdout.toString()
+  }
+
+  async exportSecretKey(keyId){
+    const command = ['--armor', '--status-fd 2', '--export-secret-keys', keyId]
+    const result = await this.call('', command)
+
+    debug('exportSecretKey stdout -', result.stdout.toString())
+    debug('exportSecretKey stderr -', result.stderr.toString())
+
+    return result.stdout.toString()
+  }
+
+
+  async importKey(key){
+    const command = ['--status-fd 2', '--import']
+    const result = await this.call(key, command)
+
+    debug('importKey stdout -', result.stdout.toString())
+    debug('importKey stderr -', result.stderr.toString())
+
+    const status = GpgParser.parseStatusFd(result.stderr.toString())
+
+    let imported = GpgParser.Status_GetImportedKeys(status)
+
+    debug('imported keys', imported)
+
+    return imported
+  }
+
   /**
    * Encrypt, sign, and armor input
    * @method
@@ -331,7 +384,7 @@ class KeyChain {
    * @returns {string} ciphertext
    */
   async encrypt(input, to, from, trust='pgp'){
-    const command = ['--encrypt', '--sign', '--armor', '--trust-model', trust]
+    const command = ['--encrypt', '--sign', '--armor', '--status-fd 2', '--trust-model', trust]
 
     if(from){
       command.push('--local-user')
@@ -346,10 +399,15 @@ class KeyChain {
     }
 
 
-    const result = (await this.call(input, command)).stdout.toString()
+    const result = await this.call(input, command)
+    
+    const stdout = result.stdout.toString()
+    const stderr = result.stderr.toString()
 
-    debug('enc data', result)
-    return result
+    debug('enc output', stdout)
+    debug('enc status', stderr)
+    debug('enc status obj', GpgParser.parseStatusFd(stderr))
+    return stdout
   }
 
   /**
@@ -358,13 +416,39 @@ class KeyChain {
    * @param {string} input 
    * @returns {Buffer}
    */
-  async decrypt(input){
-    const command = ['--decrypt']
+  async decrypt(input, {
+    from=[], trust='pgp', level, allow
+  }={}){
+    const command = ['--decrypt','--status-fd 2', '--trust-model '+trust]
 
-    const result = (await this.call(input, command)).stdout
+    const result = await this.call(input, command)
+    
+    const stdout = result.stdout.toString()
+    const stderr = result.stderr.toString()
+    const status = GpgParser.parseStatusFd(stderr)
 
-    debug('enc data', result)
-    return result
+    debug('dec output', stdout)
+    debug('dec status', JSON.stringify(status,null,2))
+
+    const validFpr = JSONPath({
+      json: status,
+      path:'$..VALIDSIG.primary_key_fpr'
+    })[0]
+
+    debug(validFpr)
+
+    
+    if(!Array.isArray(from) && from.length > 0){
+      from = [from]
+    }
+    else if(!from || (Array.isArray(from) && from.length < 1)){
+      from = [validFpr]
+    }
+
+    GpgParser.Status_AssertSignatureAllowed(status, from)
+    GpgParser.Status_AssertSignatureTrusted(status, level, allow)
+
+    return stdout
   }
 
   /**
@@ -395,6 +479,7 @@ class KeyChain {
     })
 
     if(handles.length < 1 || !handles[0]){
+      debug('handles.length', handles.length)
       throw new Error('no primary identity')
     }
 
@@ -406,11 +491,11 @@ class KeyChain {
    * @param {boolean} ultimate Only list keys with owner trust
    * @returns {Array(Objects)} Parsed gpg output packets
    */
-  async listSecretKeys(ultimate=true){
-    const command = ['--list-secret-keys', '--with-colons', '--with-fingerprint']
+  async listSecretKeys(ultimate=true, keyId){
+    const command = ['--list-secret-keys', '--with-colons', '--with-fingerprint', keyId]
     const list = (await this.call('', command)).stdout.toString()
 
-    return GPGParser.parseColons(list).filter((record)=>{
+    return GpgParser.parseColons(list).filter((record)=>{
       return record.type == 'sec' && (!ultimate ? true : ( record.validity == 'u' ))
     })
   }
@@ -420,11 +505,11 @@ class KeyChain {
    * @param {boolean} ultimate Only list keys with owner trust
    * @returns {Array(Objects)} Parsed gpg output packets
    */
-  async listPublicKeys(ultimate=false){
-    const command = ['--list-public-keys', '--with-colons', '--with-fingerprint']
+  async listPublicKeys(ultimate=false, keyId){
+    const command = ['--list-public-keys', '--with-colons', '--with-fingerprint', keyId]
     const list = (await this.call('', command)).stdout.toString()
 
-    return GPGParser.parseColons(list).filter((record)=>{
+    return GpgParser.parseColons(list).filter((record)=>{
       return record.type == 'pub' && (!ultimate ? true : ( record.validity == 'u' ))
     })
   }
