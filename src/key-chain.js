@@ -5,7 +5,7 @@ const mkdirp = require('mkdirp')
 const Hoek = require('@hapi/hoek')
 const {JSONPath} = require('jsonpath-plus')
 
-const GPGParser = require('./gpg-parser')
+const GpgParser = require('./gpg-parser')
 const KeyServerClient = require('./key-server-client')
 
 const debug = require('debug')('gpg-promised.KeyChain')
@@ -31,8 +31,8 @@ class KeyChain {
     this.temp = null
   }
 
-  static get GPGParser(){
-    return GPGParser
+  static get GpgParser(){
+    return GpgParser
   }
 
   /**
@@ -95,6 +95,7 @@ class KeyChain {
       const cardStatus = await this.cardStatus()
     }
     catch(err){
+      debug('hasCard - false - err -', err)
       return false
     }
 
@@ -142,10 +143,16 @@ class KeyChain {
    * @returns {Object}
    */
   async cardStatus(){
+    debug('cardStatus')
     const command = ['--card-status', '--with-colons', '--with-fingerprint']
-    const list = (await this.call('', command)).stdout.toString()
 
-    const status = GPGParser.parseReaderColons(list)
+    const response = await this.call('', command)
+    const list = response.stdout.toString()
+
+    debug(response.stderr.toString())
+
+    debug('\t'+list)
+    const status = GpgParser.parseReaderColons(list)
     debug('card status', status)
     return status
   }
@@ -234,8 +241,8 @@ class KeyChain {
     const command = ['--status-fd 2', '--keyserver', server, '--recv-keys', fingerprint]
     const response = await this.call('', command)
 
-    const output = GPGParser.parseReaderColons(response.stdout.toString())
-    const status = GPGParser.parseStatusFd(response.stderr.toString())
+    const output = GpgParser.parseReaderColons(response.stdout.toString())
+    const status = GpgParser.parseStatusFd(response.stderr.toString())
     debug('recvKey output', output)
     debug('recvKey status', status)
   }
@@ -358,9 +365,9 @@ class KeyChain {
     debug('importKey stdout -', result.stdout.toString())
     debug('importKey stderr -', result.stderr.toString())
 
-    const status = GPGParser.parseStatusFd(result.stderr.toString())
+    const status = GpgParser.parseStatusFd(result.stderr.toString())
 
-    let imported = GPGParser.StatusHelpers.GetImportedKeys(status)
+    let imported = GpgParser.Status_GetImportedKeys(status)
 
     debug('imported keys', imported)
 
@@ -399,7 +406,7 @@ class KeyChain {
 
     debug('enc output', stdout)
     debug('enc status', stderr)
-    debug('enc status obj', GPGParser.parseStatusFd(stderr))
+    debug('enc status obj', GpgParser.parseStatusFd(stderr))
     return stdout
   }
 
@@ -418,7 +425,7 @@ class KeyChain {
     
     const stdout = result.stdout.toString()
     const stderr = result.stderr.toString()
-    const status = GPGParser.parseStatusFd(stderr)
+    const status = GpgParser.parseStatusFd(stderr)
 
     debug('dec output', stdout)
     debug('dec status', JSON.stringify(status,null,2))
@@ -438,8 +445,8 @@ class KeyChain {
       from = [validFpr]
     }
 
-    GPGParser.StatusHelpers.AssertSignatureAllowed(status, from)
-    GPGParser.StatusHelpers.AssertSignatureTrusted(status, level, allow)
+    GpgParser.Status_AssertSignatureAllowed(status, from)
+    GpgParser.Status_AssertSignatureTrusted(status, level, allow)
 
     return stdout
   }
@@ -488,7 +495,7 @@ class KeyChain {
     const command = ['--list-secret-keys', '--with-colons', '--with-fingerprint', keyId]
     const list = (await this.call('', command)).stdout.toString()
 
-    return GPGParser.parseColons(list).filter((record)=>{
+    return GpgParser.parseColons(list).filter((record)=>{
       return record.type == 'sec' && (!ultimate ? true : ( record.validity == 'u' ))
     })
   }
@@ -502,7 +509,7 @@ class KeyChain {
     const command = ['--list-public-keys', '--with-colons', '--with-fingerprint', keyId]
     const list = (await this.call('', command)).stdout.toString()
 
-    return GPGParser.parseColons(list).filter((record)=>{
+    return GpgParser.parseColons(list).filter((record)=>{
       return record.type == 'pub' && (!ultimate ? true : ( record.validity == 'u' ))
     })
   }
