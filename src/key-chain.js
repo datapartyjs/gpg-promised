@@ -338,8 +338,9 @@ class KeyChain {
   }
 
   /**
-   * Export PGP public key
-   * @param {string} keyId 
+   * Export ascii armor PGP public key
+   * @param {string} keyId
+   * @returns {string}
    */
   async exportPublicKey(keyId){
     const command = ['--armor', '--status-fd 2', '--export', keyId]
@@ -352,8 +353,9 @@ class KeyChain {
   }
 
   /**
-   * Export PGP secret key
-   * @param {string} keyId 
+   * Export ascii armor PGP secret key
+   * @param {string} keyId
+   * @returns {string}
    */
   async exportSecretKey(keyId){
     const command = ['--armor', '--status-fd 2', '--export-secret-keys', keyId]
@@ -368,7 +370,8 @@ class KeyChain {
 
   /**
    * Import PGP key
-   * @param {string} key 
+   * @param {string} key
+   * @returns {boolean}
    */
   async importKey(key){
     const command = ['--status-fd 2', '--import']
