@@ -337,6 +337,10 @@ class KeyChain {
     debug('genkey', result)
   }
 
+  /**
+   * Export PGP public key
+   * @param {string} keyId 
+   */
   async exportPublicKey(keyId){
     const command = ['--armor', '--status-fd 2', '--export', keyId]
     const result = await this.call('', command)
@@ -347,6 +351,10 @@ class KeyChain {
     return result.stdout.toString()
   }
 
+  /**
+   * Export PGP secret key
+   * @param {string} keyId 
+   */
   async exportSecretKey(keyId){
     const command = ['--armor', '--status-fd 2', '--export-secret-keys', keyId]
     const result = await this.call('', command)
@@ -358,6 +366,10 @@ class KeyChain {
   }
 
 
+  /**
+   * Import PGP key
+   * @param {string} key 
+   */
   async importKey(key){
     const command = ['--status-fd 2', '--import']
     const result = await this.call(key, command)
