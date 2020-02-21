@@ -46,7 +46,7 @@ async function main(){
   const imported = await otherChain.importKey(key)
   console.log('imported', imported)
 
-  await otherChain.trustKey(imported[0], '6')
+  await otherChain.trustKey(imported[0], '5')
 
   const secrets = await otherChain.listSecretKeys(false)
   console.log('secrets', secrets)
