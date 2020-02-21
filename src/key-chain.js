@@ -518,6 +518,7 @@ class KeyChain {
   /**
    * List of secret keys
    * @param {boolean} ultimate Only list keys with owner trust
+   * @param {string}  keyId Query text, accepts keyid, fingerprints or email addresses
    * @returns {Array(Objects)} Parsed gpg output packets
    */
   async listSecretKeys(ultimate=true, keyId){
@@ -532,6 +533,7 @@ class KeyChain {
   /**
    * List of public keys
    * @param {boolean} ultimate Only list keys with owner trust
+   * @param {string}  keyId Query text, accepts keyid, fingerprints or email addresses
    * @returns {Array(Objects)} Parsed gpg output packets
    */
   async listPublicKeys(ultimate=false, keyId){
