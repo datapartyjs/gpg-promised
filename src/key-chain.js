@@ -490,21 +490,27 @@ class KeyChain {
     // filter for uniqueness
 
     const emails = from.filter((val)=>{ return val.indexOf('@') > -1 })
-    const emailKeyList = await this.listPublicKeys(false, emails.join(' '))
-    debug(emailKeyList)
-    const emailFingerprintList = emailKeyList.map(key=>{ 
+    if(emails.length > 0){
 
-      if(!Array.isArray(key.fpr)){
-        return Hoek.reach(key, 'fpr.user_id')
-      }
-      else{
-        return key.fpr.map(subKey=>{
-          return subKey.user_id
-        })
-      }
-    })
+      const emailKeyList = await this.listPublicKeys(false, emails.join(' '))
+      debug(emailKeyList)
+      const emailFingerprintList = []
+      
+      emailKeyList.map(key=>{ 
 
-    from = uniqueArray(from.concat(emailFingerprintList))
+        if(!Array.isArray(key.fpr)){
+          emailFingerprintList.push( Hoek.reach(key, 'fpr.user_id') )
+        }
+        else{
+          key.fpr.map(subKey=>{
+            emailFingerprintList.push( subKey.user_id )
+          })
+        }
+      })
+
+      from = uniqueArray(from.concat(emailFingerprintList))
+
+    }
 
     debug('allowed from', from)
 
