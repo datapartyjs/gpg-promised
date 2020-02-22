@@ -492,7 +492,17 @@ class KeyChain {
     const emails = from.filter((val)=>{ return val.indexOf('@') > -1 })
     const emailKeyList = await this.listPublicKeys(false, emails.join(' '))
     debug(emailKeyList)
-    const emailFingerprintList = emailKeyList.map(key=>{ return Hoek.reach(key, 'fpr.user_id') })
+    const emailFingerprintList = emailKeyList.map(key=>{ 
+
+      if(!Array.isArray(key.fpr)){
+        return Hoek.reach(key, 'fpr.user_id')
+      }
+      else{
+        return key.fpr.map(subKey=>{
+          return subKey.user_id
+        })
+      }
+    })
 
     from = uniqueArray(from.concat(emailFingerprintList))
 
