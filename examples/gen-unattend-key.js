@@ -5,7 +5,7 @@ const KeyChain = GpgPromised.KeyChain
 /***
  * 
  * This examples demostrates:
- *  - constructing a re-usable KeyChain()
+ *  - constructing a re-usable bobChain()
  *  - generating key
  * 
  */
@@ -13,56 +13,60 @@ const KeyChain = GpgPromised.KeyChain
 
 async function main(){
   
-  const keychain = new KeyChain( )
+  const bobChain = new KeyChain( )
 
-  await keychain.open()
+  await bobChain.open()
   
-    //! Make a connected security card the primary identity
-    //await keychain.trustCard()
-
-
-  await keychain.generateKey({
+  await bobChain.generateKey({
     email: 'bob@test.xyz',
     name: 'Bob bob',
     unattend: true,
   })
 
-  const who = await keychain.whoami()
-  console.log('whoami',who)
+  const who = await bobChain.whoami()
+  console.log('bob whoami',who)
 
-  const key = await keychain.exportSecretKey(who[0])
-  console.log(key)
+  const bobPub = await bobChain.exportPublicKey(who[0])
+  console.log(bobPub)
 
-  const otherChain = new KeyChain()
+  const aliceChain = new KeyChain()
 
-  await otherChain.open()
+  await aliceChain.open()
 
-  await otherChain.generateKey({
+  await aliceChain.generateKey({
     email: 'alice@test.xyz',
     name: 'Alice alice',
     unattend: true,
   })
 
-  const imported = await otherChain.importKey(key)
+  const imported = await aliceChain.importKey(bobPub)
   console.log('imported', imported)
 
-  await otherChain.trustKey(imported[0], '5')
+  await aliceChain.trustKey(imported[0], '3')
+  await aliceChain.signKey(imported[0])
 
-  const secrets = await otherChain.listSecretKeys(false)
+  const secrets = await aliceChain.listSecretKeys(false)
   console.log('secrets', secrets)
 
-  const other = await otherChain.whoami()
-  console.log('other whoami',other)
+  const other = await aliceChain.whoami()
+  console.log('alice whoami',other)
+
+  const alicePub = await aliceChain.exportPublicKey(other[0])
+
+  const bobImported = await bobChain.importKey(alicePub)
+
+  await bobChain.trustKey(bobImported[0], '3')
+  await bobChain.signKey(bobImported[0])
 
 
 
-  let toEmails = []
+  let toEmails = ['alice@test.xyz']
 
 
-  const enc = await keychain.encrypt('hello world', who.concat(toEmails), who[0])
+  const enc = await bobChain.encrypt('hello world', who.concat(toEmails), who[0])
   console.log('encrypt -', enc)
 
-  const dec = await keychain.decrypt(enc)
+  const dec = await aliceChain.decrypt(enc, {from: 'bob@test.xyz'})
   console.log('decrypt -', dec)
 
   return

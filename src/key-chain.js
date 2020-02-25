@@ -15,6 +15,16 @@ default-cache-ttl 1800
 max-cache-ttl 7200
 `
 
+const uniqueArray = (arr)=>{
+  return arr.filter((v, i, a) => {
+    if( v !== undefined && a.indexOf(v) === i){
+      return true
+    }
+
+    return false
+  })
+}
+
 const exec = require('./shell').exec
 
 class KeyChain {
@@ -430,7 +440,7 @@ class KeyChain {
    * @method
    * @param {string} input 
    * @param {Object} options
-   * @param {string[]} options.from List of keyid, fpr or uid of allowed message signers. Defaults to allowing any trusted signer
+   * @param {string[]} options.from List of keyid, fpr or uid(email) of allowed message signers. Defaults to allowing any trusted signer
    * @param {('pgp'|'classic'|'tofu'|'tofu+pgp'|'direct'|'always'|'auto')} [options.trust=pgp] Trust model See [`gpg --trust-model`](https://www.gnupg.org/documentation/manuals/gnupg/GPG-Configuration-Options.html#index-trust_002dmodel)
    * @param {Object} options.level Acceptable signer trust levels. Trust level of a specific signature is computed with respect to configured trust model
    * @param {boolean} [options.level.none=false]      Accept signers with no trust
@@ -473,6 +483,36 @@ class KeyChain {
     else if(!from || (Array.isArray(from) && from.length < 1)){
       from = [validFpr]
     }
+
+    // query public keys using from list
+    // filter public key list to top level keyid
+    // merge original from and keyid list
+    // filter for uniqueness
+
+    const emails = from.filter((val)=>{ return val.indexOf('@') > -1 })
+    if(emails.length > 0){
+
+      const emailKeyList = await this.listPublicKeys(false, emails.join(' '))
+      debug(emailKeyList)
+      const emailFingerprintList = []
+      
+      emailKeyList.map(key=>{ 
+
+        if(!Array.isArray(key.fpr)){
+          emailFingerprintList.push( Hoek.reach(key, 'fpr.user_id') )
+        }
+        else{
+          key.fpr.map(subKey=>{
+            emailFingerprintList.push( subKey.user_id )
+          })
+        }
+      })
+
+      from = uniqueArray(from.concat(emailFingerprintList))
+
+    }
+
+    debug('allowed from', from)
 
     GpgParser.Status_AssertSignatureAllowed(status, from)
     GpgParser.Status_AssertSignatureTrusted(status, level, allow)
