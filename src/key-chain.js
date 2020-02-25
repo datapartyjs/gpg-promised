@@ -462,7 +462,7 @@ class KeyChain {
 
     const result = await this.call(input, command)
     
-    const stdout = result.stdout.toString()
+    const stdout = result.stdout
     const stderr = result.stderr.toString()
     const status = GpgParser.parseStatusFd(stderr)
 
