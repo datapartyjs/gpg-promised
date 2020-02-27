@@ -41,7 +41,7 @@ exports.exec = async function(cmd, opts={encoding: 'buffer', maxBuffer: 1024*102
         verbose('exec input', input)
         let inputs = input.split('\n')
 
-        if(inputs[inputs.length-1] == null){
+        if(inputs[inputs.length-1] == ''){
           inputs = inputs.slice(0, inputs.length-1)
         }
         if(inputs.length == 0 && input.indexOf('\n') < 0 ){

@@ -359,7 +359,7 @@ class KeyChain {
     debug('exportKey stdout -', result.stdout.toString())
     debug('exportKey stderr -', result.stderr.toString())
 
-    return result.stdout.toString()
+    return result.stdout.toString() + '\n'
   }
 
   /**
