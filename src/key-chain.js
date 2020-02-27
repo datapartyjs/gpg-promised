@@ -629,7 +629,40 @@ class KeyChain {
     })
   }
 
+  /**
+   * Takes a list of emails, keyid, fingerprints and converts the 
+   * emails to fingerprints
+   * @method
+   * @param {string[]} list List of emails to resolve, keyid or fingerprints will be ignored
+   * @returns {string[]} Array of resolved fingerprints from the public keys on the key ring
+   */
+  async resolveEmails(list){
+    const fingerprints = []
+    const emails = list.filter((val)=>{ return val.indexOf('@') > -1 })
+    if(emails.length > 0){
 
+      const emailKeyList = await this.listPublicKeys(false, emails.join(' '))
+      debug(emailKeyList)
+      const emailFingerprintList = []
+      
+      emailKeyList.map(key=>{ 
+
+        if(!Array.isArray(key.fpr)){
+          emailFingerprintList.push( Hoek.reach(key, 'fpr.user_id') )
+        }
+        else{
+          key.fpr.map(subKey=>{
+            emailFingerprintList.push( subKey.user_id )
+          })
+        }
+      })
+
+      fingerprints = uniqueArray(fingerprints.concat(emailFingerprintList))
+
+    }
+
+    return fingerprints
+  }
 
   /**
    * Find a key based on id of a sub-key
