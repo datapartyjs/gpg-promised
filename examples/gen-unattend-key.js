@@ -67,7 +67,7 @@ async function main(){
   console.log('encrypt -', enc)
 
   const dec = await aliceChain.decrypt(enc, {from: 'bob@test.xyz'})
-  console.log('decrypt -', dec)
+  console.log('decrypt -', dec.toString())
 
   return
 }
