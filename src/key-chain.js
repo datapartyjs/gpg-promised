@@ -5,8 +5,11 @@ const mkdirp = require('mkdirp')
 const Hoek = require('@hapi/hoek')
 const {JSONPath} = require('jsonpath-plus')
 
+//tmp.setGracefulCleanup()
+
 const GpgParser = require('./gpg-parser')
 const KeyServerClient = require('./key-server-client')
+
 
 const debug = require('debug')('gpg-promised.KeyChain')
 
@@ -25,7 +28,7 @@ const uniqueArray = (arr)=>{
   })
 }
 
-const exec = require('./shell').exec
+const { GpgAgent, exec } = require('./shell')
 
 class KeyChain {
 
@@ -38,7 +41,9 @@ class KeyChain {
 
   constructor(homedir){
     this.homedir = homedir
+    this.autorm = true
     this.temp = null
+    this.agent = null
   }
 
   static get GpgParser(){
@@ -54,7 +59,11 @@ class KeyChain {
 
     if(!this.homedir){
       //use temp directory
-      this.temp = tmp.dirSync()
+      this.temp = tmp.dirSync({
+        mode: 0o700,
+        prefix: 'tmp-',
+        unsafeCleanup: this.autorm
+      })
       this.homedir = this.temp.name
       debug('using temp directory -', this.temp.name)
     }
@@ -73,6 +82,21 @@ class KeyChain {
     if(!fs.existsSync(this.homedir + '/gpg-agent.conf')){
       debug('write default gpg-agent.conf')
       fs.writeFileSync(this.homedir + '/gpg-agent.conf', DEFAULT_AGENT_CONFIG)
+    }
+
+    this.agent = new GpgAgent(this.homedir)
+    await this.agent.start()
+  }
+
+  async close(){
+
+    if(this.agent.isRunning()){
+      await this.agent.stop()
+    }
+
+    // only delete temp folders
+    if(this.autorm && this.temp != null){
+      this.temp.removeCallback()
     }
   }
 
