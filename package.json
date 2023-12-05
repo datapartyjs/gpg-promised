@@ -3,7 +3,7 @@
   "private": false,
   "version": "0.4.12",
   "description": "GPG async library",
-  "author": "RosHub Inc. <code@roshub.io>",
+  "author": "Dataparty LLC <code@dataparty.xyz>",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
