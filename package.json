@@ -1,7 +1,7 @@
 {
   "name": "gpg-promised",
   "private": false,
-  "version": "0.4.12",
+  "version": "0.4.13",
   "description": "GPG async library",
   "author": "Dataparty LLC <code@dataparty.xyz>",
   "license": "Apache-2.0",
