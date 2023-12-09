@@ -1,7 +1,3 @@
-
-
-
-
 const Url = require('url').URL
 const debug = require('debug')('gpg.KeyServerClient')
 const request = require('request-promise')
@@ -45,7 +41,7 @@ const HKPIndexSchema = {
         2: 'user_id',
         3: 'creationdate',
         4: 'expirationdate',
-        5: 'flags'
+        5: 'flags'            // r=revoked, d=disabled, e=expired
       }
     }
   }
@@ -76,13 +72,14 @@ class KeyServerClient {
    * @param {string} text Search text
    * @returns {string} parsed colon-seperated-values into json
    */
-  async search(text, exact=false){
+  async search(text, exact=false, fingerprint=false){
     const searchUrl = new Url ('/pks/lookup', this.baseUri)
 
     searchUrl.searchParams.append('op', 'vindex')
     searchUrl.searchParams.append('options', 'mr')
     searchUrl.searchParams.append('search', text)
-    //searchUrl.searchParams.append('fingerprint', 'on')
+    searchUrl.searchParams.append('exact', exact ? 'on' : 'off')
+    searchUrl.searchParams.append('fingerprint', fingerprint ? 'on' : 'off')
 
 
     debug('searching', searchUrl.toString())
